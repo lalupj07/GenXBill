@@ -88,7 +88,7 @@
 
 ## 🔄 Version History
 
-### **v1.0.0 (The Kerala Build)**
+### **v1.0.0**
 > *Initial Production Release - Feb 2025*
 
 *   ✨ **New**: Integrated Real-time Inventory Management.
