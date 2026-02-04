@@ -115,14 +115,72 @@
 
 ---
 
-## 🏢 About GenXis Innovations
-**GenXis Innovations** is committed to building high-quality, open-source tools that empower modern businesses. Based in **Kottayam, Kerala**, we focus on design-driven engineering and privacy-first software.
+## 🤝 Contributing
 
-*   📧 **Email**: [genxisinnovation@outlook.com](mailto:genxisinnovation@outlook.com)
-*   🌐 **Website**: [www.genxisinnovation.in](http://www.genxisinnovation.in)
-*   📜 **License**: Apache License 2.0
-*   ⚖️ **Copyright**: © 2025 GenXis Innovations. All rights reserved.
+We welcome contributions! Please feel free to submit a Pull Request.
+
+### How to Contribute
+1.  🍴 **Fork** the repository
+2.  🌿 **Create your feature branch** (`git checkout -b feature/AmazingFeature`)
+3.  💾 **Commit your changes** (`git commit -m 'Add some AmazingFeature'`)
+4.  📤 **Push to the branch** (`git push origin feature/AmazingFeature`)
+5.  🔀 **Open a Pull Request**
+
+---
+
+## 📄 License
+
+This project is licensed under the **Apache License 2.0** - see the [LICENSE](LICENSE) file for details.
 
 <div align="center">
-  <b>Built with ❤️ by GenXis Innovations</b>
+  <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" />
+</div>
+
+---
+
+## 📧 Support & Contact
+
+| Contact Method | Details |
+| :--- | :--- |
+| 📧 **Email** | [genxisinnovation@outlook.com](mailto:genxisinnovation@outlook.com) |
+| 🐛 **Bug Reports** | [GitHub Issues](https://github.com/lalupj07/GenXBill/issues) |
+| 💬 **Discussions** | [GitHub Discussions](https://github.com/lalupj07/GenXBill/discussions) |
+| 📖 **Documentation** | [GitHub Wiki](https://github.com/lalupj07/GenXBill/wiki) |
+
+---
+
+## 🌐 Links & Resources
+
+<div align="center">
+
+[![Latest Release](https://img.shields.io/github/v/release/lalupj07/GenXBill?label=Latest%20Release&style=flat-square)](https://github.com/lalupj07/GenXBill/releases)
+[![Issues](https://img.shields.io/github/issues/lalupj07/GenXBill?label=Issues&style=flat-square)](https://github.com/lalupj07/GenXBill/issues)
+[![Report Bug](https://img.shields.io/badge/Report-Bug-red?style=flat-square)](https://github.com/lalupj07/GenXBill/issues/new)
+[![Privacy Policy](https://img.shields.io/badge/Privacy-Policy-brightgreen?style=flat-square)](PRIVACY.md)
+[![Changelog](https://img.shields.io/badge/Changelog-v1.0.0-orange?style=flat-square)](CHANGELOG.md)
+
+</div>
+
+---
+
+## ⭐ Show Your Support
+
+<div align="center">
+
+If you find **GenXBill** useful, please consider giving it a ⭐ on GitHub!  
+Your support helps us improve GenXBill for everyone!
+
+[![Stars](https://img.shields.io/github/stars/lalupj07/GenXBill?style=social)](https://github.com/lalupj07/GenXBill/stargazers)
+[![Forks](https://img.shields.io/github/forks/lalupj07/GenXBill?style=social)](https://github.com/lalupj07/GenXBill/network/members)
+[![Watchers](https://img.shields.io/github/watchers/lalupj07/GenXBill?style=social)](https://github.com/lalupj07/GenXBill/watchers)
+
+</div>
+
+---
+
+<div align="center">
+  🏢 <b>About GenXis Innovations</b><br/>
+  Empowering businesses with modern open-source solutions.<br/>
+  Kottayam, Kerala, India<br/><br/>
+  🎉 <b>Made with ❤️ by <a href="http://www.genxisinnovation.in">GenXis Innovations</a></b>
 </div>
