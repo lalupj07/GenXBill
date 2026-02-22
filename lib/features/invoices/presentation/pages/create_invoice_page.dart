@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:genx_bill/core/theme/app_theme.dart';
 import 'package:genx_bill/core/services/pdf_service.dart';
+import 'package:genx_bill/core/services/whatsapp_service.dart';
 import 'package:genx_bill/features/invoices/data/models/invoice_model.dart';
 import 'package:genx_bill/features/invoices/data/repositories/invoice_repository.dart';
 import 'package:genx_bill/features/clients/data/repositories/client_repository.dart';
@@ -14,6 +15,7 @@ import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'package:genx_bill/core/providers/settings_provider.dart';
 import 'package:genx_bill/core/widgets/theme_background.dart';
+import 'package:genx_bill/core/utils/currency_utils.dart';
 
 class CreateInvoicePage extends ConsumerStatefulWidget {
   const CreateInvoicePage({super.key});
@@ -78,6 +80,10 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
   // Temporary Item Entry Handlers
   Product? _selectedProduct;
   final _qtyController = TextEditingController(text: '1');
+  final _productSearchController = TextEditingController();
+  
+  // WhatsApp sending option
+  bool _sendToWhatsApp = false;
 
   @override
   void initState() {
@@ -139,6 +145,7 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
       });
       _selectedProduct = null;
       _qtyController.text = '1';
+      _productSearchController.clear();
     });
   }
 
@@ -174,6 +181,54 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
               unit: e['unit'] ?? 'Pcs',
             ))
         .toList();
+
+    // Check Credit Limit
+    if (_selectedClient != null && _selectedClient!.creditLimit > 0) {
+      final invoiceRepo = ref.read(invoiceRepositoryProvider);
+      final clientInvoices =
+          invoiceRepo.getInvoicesByClientName(_selectedClient!.name);
+
+      // Calculate current outstanding
+      double currentOutstanding = 0;
+      for (var inv in clientInvoices) {
+        if (inv.status != InvoiceStatus.paid &&
+            inv.status != InvoiceStatus.draft) {
+          // Assuming partial payments aren't tracked on invoice object yet, just total
+          currentOutstanding += inv.total;
+        }
+      }
+
+      final newTotal = _grandTotal;
+      if (currentOutstanding + newTotal > _selectedClient!.creditLimit) {
+        final proceed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Credit Limit Exceeded'),
+            content: Text(
+                'This invoice will exceed the credit limit for ${_selectedClient!.name}.\n\n'
+                'Credit Limit: ${CurrencyUtils.formatAmount(_selectedClient!.creditLimit, ref.read(settingsProvider).currency)}\n'
+                'Current Outstanding: ${CurrencyUtils.formatAmount(currentOutstanding, ref.read(settingsProvider).currency)}\n'
+                'New Invoice Total: ${CurrencyUtils.formatAmount(newTotal, ref.read(settingsProvider).currency)}\n'
+                'Projected Total: ${CurrencyUtils.formatAmount(currentOutstanding + newTotal, ref.read(settingsProvider).currency)}\n\n'
+                'Do you want to proceed?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child:
+                    const Text('Cancel', style: TextStyle(color: Colors.red)),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text('Proceed Anyway'),
+              ),
+            ],
+          ),
+        );
+
+        if (proceed != true) return;
+      }
+    }
 
     final newInvoice = Invoice(
       id: const Uuid().v4(),
@@ -216,6 +271,34 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
 
     // Show Preview/Print
     await Printing.layoutPdf(onLayout: (format) async => pdfData);
+
+    // Send to WhatsApp if option is enabled and client has phone number
+    if (_sendToWhatsApp && _selectedClient != null && 
+        WhatsAppService.isValidPhoneNumber(_selectedClient!.phone)) {
+      final sent = await WhatsAppService.sendInvoicePDF(
+        phoneNumber: _selectedClient!.phone,
+        pdfBytes: pdfData,
+        invoiceNumber: newInvoice.invoiceNumber,
+      );
+      
+      if (mounted) {
+        if (sent) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Invoice sent to WhatsApp: ${_selectedClient!.phone}'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to open WhatsApp. Please check if WhatsApp is installed.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      }
+    }
 
     if (mounted) {
       Navigator.pop(context);
@@ -430,6 +513,39 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
             keyboardType: TextInputType.number,
             onChanged: (_) => setState(() {}),
           ),
+          const SizedBox(height: 12),
+          // WhatsApp sending option
+          CheckboxListTile(
+            value: _sendToWhatsApp,
+            onChanged: _selectedClient != null && 
+                      WhatsAppService.isValidPhoneNumber(_selectedClient!.phone)
+                ? (value) => setState(() => _sendToWhatsApp = value ?? false)
+                : null,
+            title: Row(
+              children: [
+                const Icon(Icons.chat, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _selectedClient != null && 
+                    WhatsAppService.isValidPhoneNumber(_selectedClient!.phone)
+                        ? 'Send invoice to WhatsApp (${_selectedClient!.phone})'
+                        : 'Send invoice to WhatsApp (No valid phone number)',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: _selectedClient != null && 
+                             WhatsAppService.isValidPhoneNumber(_selectedClient!.phone)
+                          ? Colors.white
+                          : Colors.grey,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+          ),
         ],
       ),
     );
@@ -535,24 +651,43 @@ class _CreateInvoicePageState extends ConsumerState<CreateInvoicePage> {
         children: [
           Expanded(
             flex: 3,
-            child: LayoutBuilder(builder: (context, constraints) {
-              final products =
-                  ref.read(productRepositoryProvider).getActiveProducts();
-              return DropdownMenu<Product>(
-                width: constraints.maxWidth,
-                enableFilter: true,
-                label: const Text("Product (Search)"),
-                dropdownMenuEntries: products
-                    .map((p) =>
-                        DropdownMenuEntry<Product>(value: p, label: p.name))
-                    .toList(),
-                onSelected: (p) {
-                  if (p != null) {
-                    setState(() => _selectedProduct = p);
+            child: Autocomplete<Product>(
+              displayStringForOption: (p) => "${p.name} [ID: ${p.sku}]",
+              optionsBuilder: (TextEditingValue textEditingValue) {
+                if (textEditingValue.text == '') {
+                  return const Iterable<Product>.empty();
+                }
+                final allProducts =
+                    ref.read(productRepositoryProvider).getActiveProducts();
+                return allProducts.where((p) {
+                  final query = textEditingValue.text.toLowerCase();
+                  return p.name.toLowerCase().contains(query) ||
+                      p.sku.toLowerCase().contains(query) ||
+                      p.hsnCode.toLowerCase().contains(query) ||
+                      p.id.toLowerCase().contains(query);
+                });
+              },
+              onSelected: (p) {
+                setState(() => _selectedProduct = p);
+              },
+              fieldViewBuilder:
+                  (context, controller, focusNode, onFieldSubmitted) {
+                _productSearchController.text = controller.text;
+                _productSearchController.addListener(() {
+                  if (_productSearchController.text != controller.text) {
+                    controller.text = _productSearchController.text;
                   }
-                },
-              );
-            }),
+                });
+                return TextField(
+                  controller: controller,
+                  focusNode: focusNode,
+                  decoration: const InputDecoration(
+                    labelText: "Product (Search Name, ID, SKU or HSN)",
+                    prefixIcon: Icon(Icons.search),
+                  ),
+                );
+              },
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
