@@ -38,6 +38,27 @@ class InvoiceItem {
       unit: unit,
     );
   }
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'description': description,
+      'quantity': quantity,
+      'unitPrice': unitPrice,
+      'hsnCode': hsnCode,
+      'unit': unit,
+    };
+  }
+
+  factory InvoiceItem.fromJson(Map<String, dynamic> json) {
+    return InvoiceItem(
+      id: json['id'] as String,
+      description: json['description'] as String,
+      quantity: (json['quantity'] as num).toDouble(),
+      unitPrice: (json['unitPrice'] as num).toDouble(),
+      hsnCode: json['hsnCode'] as String? ?? '',
+      unit: json['unit'] as String? ?? 'Pcs',
+    );
+  }
 }
 
 class Invoice {
@@ -55,10 +76,25 @@ class Invoice {
   final DateTime? poDate;
   final String transportMode;
   final double courierCharges;
-  final String gstin;
-  final String stateCode;
+  final String gstin; // Company GSTIN
+  final String stateCode; // Company State Code
   final bool isInterstate;
   final String shippingAddress;
+  
+  // Client Details
+  final String clientAddress;
+  final String clientGstin;
+  final String clientStateCode;
+  final String clientPhone;
+  final String clientEmail;
+  
+  // Additional Invoice Details
+  final String orderNumber;
+  final DateTime? orderDate;
+  final String paymentTerms;
+  final String deliveryNote;
+  final String dispatchedThrough;
+  final String destination;
 
   Invoice({
     required this.id,
@@ -77,6 +113,17 @@ class Invoice {
     this.stateCode = '',
     this.isInterstate = false,
     this.shippingAddress = '',
+    this.clientAddress = '',
+    this.clientGstin = '',
+    this.clientStateCode = '',
+    this.clientPhone = '',
+    this.clientEmail = '',
+    this.orderNumber = '',
+    this.orderDate,
+    this.paymentTerms = '',
+    this.deliveryNote = '',
+    this.dispatchedThrough = '',
+    this.destination = '',
   });
 
   double get subtotal => items.fold(0, (sum, item) => sum + item.total);
@@ -87,6 +134,72 @@ class Invoice {
   double get tax => subtotal * 0.18; // Default 18% GST
 
   double get total => subtotal + tax + courierCharges;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'invoiceNumber': invoiceNumber,
+      'clientName': clientName,
+      'date': date.toIso8601String(),
+      'dueDate': dueDate.toIso8601String(),
+      'items': items.map((e) => e.toJson()).toList(),
+      'status': status.index,
+      'notes': notes,
+      'poNumber': poNumber,
+      'poDate': poDate?.toIso8601String(),
+      'transportMode': transportMode,
+      'courierCharges': courierCharges,
+      'gstin': gstin,
+      'stateCode': stateCode,
+      'isInterstate': isInterstate,
+      'shippingAddress': shippingAddress,
+      'clientAddress': clientAddress,
+      'clientGstin': clientGstin,
+      'clientStateCode': clientStateCode,
+      'clientPhone': clientPhone,
+      'clientEmail': clientEmail,
+      'orderNumber': orderNumber,
+      'orderDate': orderDate?.toIso8601String(),
+      'paymentTerms': paymentTerms,
+      'deliveryNote': deliveryNote,
+      'dispatchedThrough': dispatchedThrough,
+      'destination': destination,
+    };
+  }
+
+  factory Invoice.fromJson(Map<String, dynamic> json) {
+    return Invoice(
+      id: json['id'] as String,
+      invoiceNumber: json['invoiceNumber'] as String,
+      clientName: json['clientName'] as String,
+      date: DateTime.parse(json['date'] as String),
+      dueDate: DateTime.parse(json['dueDate'] as String),
+      items: (json['items'] as List)
+          .map((e) => InvoiceItem.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      status: InvoiceStatus.values[json['status'] as int],
+      notes: json['notes'] as String? ?? '',
+      poNumber: json['poNumber'] as String? ?? '',
+      poDate: json['poDate'] != null ? DateTime.parse(json['poDate']) : null,
+      transportMode: json['transportMode'] as String? ?? '',
+      courierCharges: (json['courierCharges'] as num?)?.toDouble() ?? 0.0,
+      gstin: json['gstin'] as String? ?? '',
+      stateCode: json['stateCode'] as String? ?? '',
+      isInterstate: json['isInterstate'] as bool? ?? false,
+      shippingAddress: json['shippingAddress'] as String? ?? '',
+      clientAddress: json['clientAddress'] as String? ?? '',
+      clientGstin: json['clientGstin'] as String? ?? '',
+      clientStateCode: json['clientStateCode'] as String? ?? '',
+      clientPhone: json['clientPhone'] as String? ?? '',
+      clientEmail: json['clientEmail'] as String? ?? '',
+      orderNumber: json['orderNumber'] as String? ?? '',
+      orderDate: json['orderDate'] != null ? DateTime.parse(json['orderDate']) : null,
+      paymentTerms: json['paymentTerms'] as String? ?? '',
+      deliveryNote: json['deliveryNote'] as String? ?? '',
+      dispatchedThrough: json['dispatchedThrough'] as String? ?? '',
+      destination: json['destination'] as String? ?? '',
+    );
+  }
 }
 
 class InvoiceAdapter extends TypeAdapter<Invoice> {
@@ -100,29 +213,40 @@ class InvoiceAdapter extends TypeAdapter<Invoice> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Invoice(
-      id: fields[0] as String,
-      invoiceNumber: fields[1] as String,
-      clientName: fields[2] as String,
-      date: fields[3] as DateTime,
-      dueDate: fields[4] as DateTime,
-      items: (fields[5] as List).cast<InvoiceItem>(),
-      status: fields[6] as InvoiceStatus,
-      notes: fields[7] as String,
-      poNumber: fields.containsKey(8) ? fields[8] as String : '',
+      id: (fields.containsKey(0) && fields[0] != null) ? fields[0] as String : '',
+      invoiceNumber: (fields.containsKey(1) && fields[1] != null) ? fields[1] as String : '',
+      clientName: (fields.containsKey(2) && fields[2] != null) ? fields[2] as String : '',
+      date: (fields.containsKey(3) && fields[3] != null) ? fields[3] as DateTime : DateTime.now(),
+      dueDate: (fields.containsKey(4) && fields[4] != null) ? fields[4] as DateTime : DateTime.now(),
+      items: (fields.containsKey(5) && fields[5] != null) ? (fields[5] as List).cast<InvoiceItem>() : [],
+      status: (fields.containsKey(6) && fields[6] != null) ? fields[6] as InvoiceStatus : InvoiceStatus.draft,
+      notes: (fields.containsKey(7) && fields[7] != null) ? fields[7] as String : '',
+      poNumber: (fields.containsKey(8) && fields[8] != null) ? fields[8] as String : '',
       poDate: fields.containsKey(9) ? fields[9] as DateTime? : null,
-      transportMode: fields.containsKey(10) ? fields[10] as String : '',
-      courierCharges: fields.containsKey(11) ? fields[11] as double : 0.0,
-      gstin: fields.containsKey(12) ? fields[12] as String : '',
-      stateCode: fields.containsKey(13) ? fields[13] as String : '',
-      isInterstate: fields.containsKey(14) ? fields[14] as bool : false,
-      shippingAddress: fields.containsKey(15) ? fields[15] as String : '',
+      transportMode: (fields.containsKey(10) && fields[10] != null) ? fields[10] as String : '',
+      courierCharges: (fields.containsKey(11) && fields[11] != null) ? fields[11] as double : 0.0,
+      gstin: (fields.containsKey(12) && fields[12] != null) ? fields[12] as String : '',
+      stateCode: (fields.containsKey(13) && fields[13] != null) ? fields[13] as String : '',
+      isInterstate: (fields.containsKey(14) && fields[14] != null) ? fields[14] as bool : false,
+      shippingAddress: (fields.containsKey(15) && fields[15] != null) ? fields[15] as String : '',
+      clientAddress: (fields.containsKey(16) && fields[16] != null) ? fields[16] as String : '',
+      clientGstin: (fields.containsKey(17) && fields[17] != null) ? fields[17] as String : '',
+      clientStateCode: (fields.containsKey(18) && fields[18] != null) ? fields[18] as String : '',
+      clientPhone: (fields.containsKey(19) && fields[19] != null) ? fields[19] as String : '',
+      clientEmail: (fields.containsKey(20) && fields[20] != null) ? fields[20] as String : '',
+      orderNumber: (fields.containsKey(21) && fields[21] != null) ? fields[21] as String : '',
+      orderDate: fields.containsKey(22) ? fields[22] as DateTime? : null,
+      paymentTerms: (fields.containsKey(23) && fields[23] != null) ? fields[23] as String : '',
+      deliveryNote: (fields.containsKey(24) && fields[24] != null) ? fields[24] as String : '',
+      dispatchedThrough: (fields.containsKey(25) && fields[25] != null) ? fields[25] as String : '',
+      destination: (fields.containsKey(26) && fields[26] != null) ? fields[26] as String : '',
     );
   }
 
   @override
   void write(BinaryWriter writer, Invoice obj) {
     writer
-      ..writeByte(16)
+      ..writeByte(27)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -154,7 +278,29 @@ class InvoiceAdapter extends TypeAdapter<Invoice> {
       ..writeByte(14)
       ..write(obj.isInterstate)
       ..writeByte(15)
-      ..write(obj.shippingAddress);
+      ..write(obj.shippingAddress)
+      ..writeByte(16)
+      ..write(obj.clientAddress)
+      ..writeByte(17)
+      ..write(obj.clientGstin)
+      ..writeByte(18)
+      ..write(obj.clientStateCode)
+      ..writeByte(19)
+      ..write(obj.clientPhone)
+      ..writeByte(20)
+      ..write(obj.clientEmail)
+      ..writeByte(21)
+      ..write(obj.orderNumber)
+      ..writeByte(22)
+      ..write(obj.orderDate)
+      ..writeByte(23)
+      ..write(obj.paymentTerms)
+      ..writeByte(24)
+      ..write(obj.deliveryNote)
+      ..writeByte(25)
+      ..write(obj.dispatchedThrough)
+      ..writeByte(26)
+      ..write(obj.destination);
   }
 }
 

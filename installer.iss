@@ -1,6 +1,6 @@
 [Setup]
 AppName=GenXBill
-AppVersion=5.1.0
+AppVersion=5.2.0
 AppPublisher=GenXis Inc
 DefaultGroupName=GenXBill
 DefaultDirName={autopf}\GenXBill
@@ -8,7 +8,7 @@ UninstallDisplayIcon={app}\genx_bill.exe
 Compression=lzma2
 SolidCompression=yes
 OutputDir=.
-OutputBaseFilename=GenXBill_Setup_v5.1.0
+OutputBaseFilename=GenXBill_Setup_v5.2.0
 PrivilegesRequired=admin
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64

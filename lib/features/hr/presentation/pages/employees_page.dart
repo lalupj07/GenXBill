@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:genx_bill/core/theme/app_theme.dart';
 import 'package:genx_bill/features/hr/providers/hr_providers.dart';
 import 'package:genx_bill/features/hr/data/models/employee_model.dart' as hr;
-import 'package:genx_bill/features/hr/presentation/pages/hr_placeholder_pages.dart';
+import 'package:genx_bill/features/hr/presentation/pages/add_employee_page.dart';
 import 'package:genx_bill/features/hr/presentation/pages/employee_profile_page.dart';
 import 'package:genx_bill/core/widgets/theme_background.dart';
 

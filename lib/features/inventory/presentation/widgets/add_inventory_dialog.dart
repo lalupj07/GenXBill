@@ -57,24 +57,44 @@ class _AddInventoryDialogState extends ConsumerState<AddInventoryDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                DropdownButtonFormField<Product>(
-                  decoration:
-                      const InputDecoration(labelText: 'Select Product'),
-                  items: products.map((p) {
-                    return DropdownMenuItem(value: p, child: Text(p.name));
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedProduct = value;
-                      if (value != null) {
-                        _skuController.text = value.sku;
-                        _costPriceController.text = value.unitPrice.toString();
-                        _sellingPriceController.text =
-                            (value.unitPrice * 1.2).toStringAsFixed(2);
-                      }
+                Autocomplete<Product>(
+                  displayStringForOption: (p) => "${p.name} [ID: ${p.sku}]",
+                  optionsBuilder: (TextEditingValue textEditingValue) {
+                    if (textEditingValue.text == '') {
+                      return const Iterable<Product>.empty();
+                    }
+                    return products.where((p) {
+                      final query = textEditingValue.text.toLowerCase();
+                      return p.name.toLowerCase().contains(query) ||
+                          p.sku.toLowerCase().contains(query) ||
+                          p.hsnCode.toLowerCase().contains(query) ||
+                          p.id.toLowerCase().contains(query);
                     });
                   },
-                  validator: (v) => v == null ? 'Required' : null,
+                  onSelected: (value) {
+                    setState(() {
+                      _selectedProduct = value;
+                      _skuController.text = value.sku;
+                      _costPriceController.text = value.unitPrice.toString();
+                      _sellingPriceController.text =
+                          (value.unitPrice * 1.2).toStringAsFixed(2);
+                    });
+                  },
+                  fieldViewBuilder:
+                      (context, controller, focusNode, onFieldSubmitted) {
+                    return TextFormField(
+                      controller: controller,
+                      focusNode: focusNode,
+                      decoration: const InputDecoration(
+                        labelText: 'Search Product (Name, ID, SKU or HSN) *',
+                        prefixIcon: Icon(Icons.search),
+                      ),
+                      validator: (v) =>
+                          (_selectedProduct == null && (v == null || v.isEmpty))
+                              ? 'Please select a product'
+                              : null,
+                    );
+                  },
                 ),
                 const SizedBox(height: 16),
                 Row(

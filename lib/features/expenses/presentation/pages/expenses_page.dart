@@ -7,7 +7,7 @@ import 'package:genx_bill/features/expenses/presentation/widgets/add_expense_dia
 import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-import 'package:genx_bill/core/widgets/main_layout.dart';
+import 'package:genx_bill/core/providers/navigation_provider.dart';
 
 class ExpensesPage extends ConsumerStatefulWidget {
   const ExpensesPage({super.key});

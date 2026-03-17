@@ -99,11 +99,13 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     String? currency,
     String? language,
     String? themeMode,
+    double? uiScale,
   }) async {
     final updated = state.copyWith(
       currency: currency,
       language: language,
       themeMode: themeMode,
+      uiScale: uiScale,
     );
     await updateSettings(updated);
   }

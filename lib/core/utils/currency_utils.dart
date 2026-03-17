@@ -12,7 +12,7 @@ class CurrencyUtils {
         break;
       case 'EUR':
         symbol = '€';
-        locale = 'en_EU';
+        locale = 'en_IE';
         break;
       case 'GBP':
         symbol = '£';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:genx_bill/core/theme/app_theme.dart';
@@ -21,6 +22,8 @@ class _PasscodeLoginPageState extends ConsumerState<PasscodeLoginPage>
   bool _isSuccess = false;
   late AnimationController _shakeController;
 
+  final FocusNode _focusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -28,12 +31,49 @@ class _PasscodeLoginPageState extends ConsumerState<PasscodeLoginPage>
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
   }
 
   @override
   void dispose() {
     _shakeController.dispose();
+    _focusNode.dispose();
     super.dispose();
+  }
+
+  void _onKeyboardKey(KeyEvent event) {
+    if (event is KeyDownEvent) {
+      final logicalKey = event.logicalKey;
+
+      // Standard numbers 0-9
+      if (logicalKey.keyLabel.length == 1 &&
+          RegExp(r'[0-9]').hasMatch(logicalKey.keyLabel)) {
+        _onNumberPressed(logicalKey.keyLabel);
+        return;
+      }
+
+      // Numpad Support
+      final numpadMap = {
+        LogicalKeyboardKey.numpad0: '0',
+        LogicalKeyboardKey.numpad1: '1',
+        LogicalKeyboardKey.numpad2: '2',
+        LogicalKeyboardKey.numpad3: '3',
+        LogicalKeyboardKey.numpad4: '4',
+        LogicalKeyboardKey.numpad5: '5',
+        LogicalKeyboardKey.numpad6: '6',
+        LogicalKeyboardKey.numpad7: '7',
+        LogicalKeyboardKey.numpad8: '8',
+        LogicalKeyboardKey.numpad9: '9',
+      };
+
+      if (numpadMap.containsKey(logicalKey)) {
+        _onNumberPressed(numpadMap[logicalKey]!);
+      } else if (logicalKey == LogicalKeyboardKey.backspace) {
+        _onBackspacePressed();
+      }
+    }
   }
 
   void _onNumberPressed(String number) {
@@ -91,71 +131,76 @@ class _PasscodeLoginPageState extends ConsumerState<PasscodeLoginPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppTheme.backgroundColor,
-              AppTheme.backgroundColor.withValues(alpha: 0.8),
-              AppTheme.primaryColor.withValues(alpha: 0.2),
-            ],
+      body: KeyboardListener(
+        focusNode: _focusNode,
+        autofocus: true,
+        onKeyEvent: _onKeyboardKey,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppTheme.backgroundColor,
+                AppTheme.backgroundColor.withValues(alpha: 0.8),
+                AppTheme.primaryColor.withValues(alpha: 0.2),
+              ],
+            ),
           ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Logo and Title
-                  _buildHeader(),
+          child: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Logo and Title
+                    _buildHeader(),
 
-                  const SizedBox(height: 40),
+                    const SizedBox(height: 40),
 
-                  // Passcode Dots
-                  _buildPasscodeDots(),
+                    // Passcode Dots
+                    _buildPasscodeDots(),
 
-                  const SizedBox(height: 10),
+                    const SizedBox(height: 10),
 
-                  // Error/Success Message
-                  _buildMessage(),
+                    // Error/Success Message
+                    _buildMessage(),
 
-                  const SizedBox(height: 40),
+                    const SizedBox(height: 40),
 
-                  // Number Pad
-                  _buildNumberPad(),
+                    // Number Pad
+                    _buildNumberPad(),
 
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-                  // Forgot Passcode Link
-                  TextButton(
-                    onPressed: () async {
-                      final result = await showDialog<bool>(
-                        context: context,
-                        builder: (context) => const ForgotPasscodeDialog(),
-                      );
+                    // Forgot Passcode Link
+                    TextButton(
+                      onPressed: () async {
+                        final result = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => const ForgotPasscodeDialog(),
+                        );
 
-                      if (result == true && mounted) {
-                        // Passcode was reset successfully
-                        setState(() {
-                          _enteredPasscode.clear();
-                          _isError = false;
-                        });
-                      }
-                    },
-                    child: const Text(
-                      'Forgot Passcode?',
-                      style: TextStyle(
-                        color: AppTheme.primaryColor,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                        if (result == true && mounted) {
+                          // Passcode was reset successfully
+                          setState(() {
+                            _enteredPasscode.clear();
+                            _isError = false;
+                          });
+                        }
+                      },
+                      child: const Text(
+                        'Forgot Passcode?',
+                        style: TextStyle(
+                          color: AppTheme.primaryColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                  ).animate().fadeIn(delay: 1000.ms),
-                ],
+                    ).animate().fadeIn(delay: 1000.ms),
+                  ],
+                ),
               ),
             ),
           ),

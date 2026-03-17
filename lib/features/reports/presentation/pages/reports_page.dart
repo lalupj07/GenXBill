@@ -14,7 +14,7 @@ import 'package:genx_bill/core/providers/settings_provider.dart';
 import 'package:genx_bill/core/services/csv_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-import 'package:genx_bill/core/widgets/main_layout.dart';
+import 'package:genx_bill/core/providers/navigation_provider.dart';
 import 'package:genx_bill/core/widgets/theme_background.dart';
 import 'package:genx_bill/core/utils/currency_utils.dart';
 import 'package:genx_bill/l10n/app_localizations.dart';

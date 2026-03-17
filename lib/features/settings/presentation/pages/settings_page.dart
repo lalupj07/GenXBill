@@ -10,9 +10,15 @@ import 'package:intl/intl.dart';
 import 'package:genx_bill/features/invoices/data/models/invoice_template.dart';
 import 'package:genx_bill/l10n/app_localizations.dart';
 
-import 'package:genx_bill/core/widgets/main_layout.dart';
+import 'package:genx_bill/core/providers/navigation_provider.dart';
 import 'package:genx_bill/core/services/demo_data_service.dart';
 import 'package:genx_bill/features/settings/presentation/widgets/change_passcode_dialog.dart';
+import 'package:genx_bill/features/sync/presentation/pages/sync_settings_page.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:genx_bill/core/services/backup_service.dart';
+import 'package:genx_bill/features/invoices/presentation/widgets/invoice_theme_selector.dart';
+import 'package:genx_bill/features/reminders/presentation/widgets/reminder_settings_widget.dart';
+import 'package:genx_bill/features/settings/presentation/widgets/template_selector_card.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -28,7 +34,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 7, vsync: this);
+    _tabController = TabController(length: 10, vsync: this);
   }
 
   @override
@@ -52,9 +58,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                 Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      icon: Icon(Icons.arrow_back,
+                          color: Theme.of(context).colorScheme.onSurface),
                       onPressed: () {
-                        ref.read(navigationProvider.notifier).state = 0;
+                        if (Navigator.canPop(context)) {
+                          Navigator.pop(context);
+                        } else {
+                          ref.read(navigationProvider.notifier).state = 0;
+                        }
                       },
                       tooltip: AppLocalizations.of(context)!.dashboard,
                     ),
@@ -98,6 +109,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                     icon: const Icon(Icons.email_outlined),
                     text: AppLocalizations.of(context)!.email),
                 const Tab(
+                    icon: Icon(Icons.palette_outlined), text: 'Invoice Themes'),
+                const Tab(
+                    icon: Icon(Icons.notifications_active), text: 'Reminders'),
+                const Tab(icon: Icon(Icons.sync), text: 'Network Sync'),
+                const Tab(
                     icon: Icon(Icons.info_outline), text: 'License & About'),
               ],
             ),
@@ -112,6 +128,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                   AppearanceSettingsTab(),
                   SecuritySettingsTab(),
                   EmailSettingsTab(),
+                  InvoiceThemeSelector(),
+                  ReminderSettingsWidget(),
+                  SyncSettingsView(),
                   AboutSettingsTab(),
                 ],
               ),
@@ -177,6 +196,18 @@ class _CompanySettingsTabState extends ConsumerState<CompanySettingsTab> {
     super.dispose();
   }
 
+  Future<void> _pickImage(TextEditingController controller) async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+
+    if (result != null && result.files.single.path != null) {
+      setState(() {
+        controller.text = result.files.single.path!;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -200,27 +231,39 @@ class _CompanySettingsTabState extends ConsumerState<CompanySettingsTab> {
             const SizedBox(height: 16),
             TextField(
               controller: _logoController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Company Logo Path (Local path or URL)',
-                prefixIcon: Icon(Icons.image),
+                prefixIcon: const Icon(Icons.image),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.folder_open),
+                  onPressed: () => _pickImage(_logoController),
+                ),
                 helperText: 'Absolute path to image file (e.g. C:/logo.png)',
               ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _signatureController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Digital Signature Path',
-                prefixIcon: Icon(Icons.gesture),
+                prefixIcon: const Icon(Icons.gesture),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.folder_open),
+                  onPressed: () => _pickImage(_signatureController),
+                ),
                 helperText: 'Absolute path to signature image',
               ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _stampController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Company Stamp Path',
-                prefixIcon: Icon(Icons.approval),
+                prefixIcon: const Icon(Icons.approval),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.folder_open),
+                  onPressed: () => _pickImage(_stampController),
+                ),
                 helperText: 'Absolute path to stamp image',
               ),
             ),
@@ -455,27 +498,10 @@ class _InvoiceSettingsTabState extends ConsumerState<InvoiceSettingsTab> {
               },
             ),
             const SizedBox(height: 32),
-            const Text(
-              'PDF Template',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 24),
-            DropdownButtonFormField<InvoiceTemplate>(
-              initialValue: _selectedTemplate,
-              decoration: const InputDecoration(
-                labelText: 'Default Template',
-                prefixIcon: Icon(Icons.description),
-              ),
-              items: InvoiceTemplate.values.map((template) {
-                return DropdownMenuItem(
-                  value: template,
-                  child: Text(template.name.toUpperCase()),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => _selectedTemplate = value);
-                }
+            TemplateSelectorCard(
+              selectedTemplate: _selectedTemplate,
+              onTemplateChanged: (template) {
+                setState(() => _selectedTemplate = template);
               },
             ),
             const SizedBox(height: 32),
@@ -742,18 +768,25 @@ class AppearanceSettingsTab extends ConsumerWidget {
             const SizedBox(height: 32),
             const Divider(),
             const SizedBox(height: 16),
-            ListTile(
-              leading: const Icon(Icons.palette),
-              title: const Text('Accent Color'),
-              subtitle: const Text('Purple (Default)'),
-              trailing: Container(
-                width: 40,
-                height: 40,
-                decoration: const BoxDecoration(
-                  color: AppTheme.primaryColor,
-                  shape: BoxShape.circle,
-                ),
-              ),
+            const Text(
+              'UI Scale',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Adjust overall interface size (${(settings.uiScale * 100).round()}%)',
+              style: const TextStyle(color: Colors.grey),
+            ),
+            Slider(
+              min: 0.8,
+              max: 1.4,
+              divisions: 6,
+              value: settings.uiScale.clamp(0.8, 1.4),
+              label: '${(settings.uiScale * 100).round()}%',
+              onChanged: (value) {
+                ref.read(settingsProvider.notifier).updateAppearanceSettings(
+                    uiScale: double.parse(value.toStringAsFixed(2)));
+              },
             ),
           ],
         ),
@@ -771,7 +804,8 @@ class SecuritySettingsTab extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final logsList = ref.watch(loggerServiceProvider).getLogs();
 
-    return Column(
+    return SingleChildScrollView(
+        child: Column(
       children: [
         GlassContainer(
           padding: const EdgeInsets.all(24),
@@ -886,94 +920,131 @@ class SecuritySettingsTab extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 24),
-        Expanded(
-          child: GlassContainer(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Activity Logs',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    TextButton.icon(
-                      onPressed: () =>
-                          ref.read(loggerServiceProvider).clearLogs(),
-                      icon: const Icon(Icons.delete_sweep, size: 18),
-                      label: const Text('Clear Logs'),
-                      style: TextButton.styleFrom(
-                          foregroundColor: Colors.redAccent),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: logsList.isEmpty
-                      ? const Center(child: Text('No activity logs yet.'))
-                      : ListView.separated(
-                          itemCount: logsList.length,
-                          separatorBuilder: (context, index) =>
-                              const Divider(color: Colors.white10),
-                          itemBuilder: (context, index) {
-                            final log = logsList[index];
-                            return ListTile(
-                              leading: Icon(
-                                _getLogIcon(log.action),
-                                color: _getLogColor(log.action),
-                                size: 20,
-                              ),
-                              title: Text(log.action,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14)),
-                              subtitle: Text(
-                                '${log.details}\n${DateFormat('dd MMM yyyy, hh:mm a').format(log.timestamp)}',
-                                style: TextStyle(
-                                    color: Colors.grey[400], fontSize: 12),
-                              ),
-                              trailing: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: Colors.white10,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  log.userRole.name,
-                                  style: const TextStyle(fontSize: 10),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                ),
-                const Divider(),
-                const SizedBox(height: 16),
-                // --- DEMO DATA SECTION ---
-                const Text(
-                  'Developer Options',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                ElevatedButton.icon(
-                  onPressed: () => _loadDemoData(context, ref),
-                  icon: const Icon(Icons.download_for_offline),
-                  label: const Text('Load Demo Data'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    foregroundColor: Colors.white,
+        GlassContainer(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Activity Logs',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
+                  TextButton.icon(
+                    onPressed: () =>
+                        ref.read(loggerServiceProvider).clearLogs(),
+                    icon: const Icon(Icons.delete_sweep, size: 18),
+                    label: const Text('Clear Logs'),
+                    style:
+                        TextButton.styleFrom(foregroundColor: Colors.redAccent),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const SizedBox(height: 16),
+              logsList.isEmpty
+                  ? const Center(
+                      child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text('No activity logs yet.'),
+                    ))
+                  : ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: logsList.length,
+                      separatorBuilder: (context, index) =>
+                          const Divider(color: Colors.white10),
+                      itemBuilder: (context, index) {
+                        final log = logsList[index];
+                        return ListTile(
+                          leading: Icon(
+                            _getLogIcon(log.action),
+                            color: _getLogColor(log.action),
+                            size: 20,
+                          ),
+                          title: Text(log.action,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 14)),
+                          subtitle: Text(
+                            '${log.details}\n${DateFormat('dd MMM yyyy, hh:mm a').format(log.timestamp)}',
+                            style: TextStyle(
+                                color: Colors.grey[400], fontSize: 12),
+                          ),
+                          trailing: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.white10,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              log.userRole.name,
+                              style: const TextStyle(fontSize: 10),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+              const Divider(),
+              const SizedBox(height: 16),
+              // --- DATA MANAGEMENT ---
+              const Text(
+                'Data Management',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => _backupData(context),
+                      icon: const Icon(Icons.backup),
+                      label: const Text('Backup Data'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => _restoreData(context),
+                      icon: const Icon(Icons.restore),
+                      label: const Text('Restore Data'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              const Divider(),
+              const SizedBox(height: 16),
+              // --- DEMO DATA SECTION ---
+              const Text(
+                'Developer Options',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton.icon(
+                onPressed: () => _loadDemoData(context, ref),
+                icon: const Icon(Icons.download_for_offline),
+                label: const Text('Load Demo Data'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ],
-    ).animate().fadeIn(delay: 100.ms);
+    ).animate().fadeIn(delay: 100.ms));
   }
 
   void _loadDemoData(BuildContext context, WidgetRef ref) {
@@ -999,6 +1070,93 @@ class SecuritySettingsTab extends ConsumerWidget {
     if (action.contains('Edit')) return Colors.blue;
     if (action.contains('Delete')) return Colors.redAccent;
     return Colors.white70;
+  }
+
+  Future<void> _backupData(BuildContext context) async {
+    try {
+      final path = await BackupService().createBackup();
+      if (context.mounted) {
+        if (path != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Backup created successfully: $path'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          // Cancelled or specific error
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Backup failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _restoreData(BuildContext context) async {
+    // Show confirmation dialog first
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Restore Data?'),
+        content: const Text(
+            'WARNING: restoring data will OVERWRITE all current data. This cannot be undone. Are you sure?'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Overwrite & Restore'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      final success = await BackupService().restoreBackup();
+      if (context.mounted) {
+        if (success) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+              title: const Text('Restore Successful'),
+              content: const Text(
+                  'Data restored successfully. Please restart the application to apply changes.'),
+              actions: [
+                TextButton(
+                  onPressed: () => SystemNavigator.pop(), // Closes app
+                  child: const Text('Close App'),
+                ),
+              ],
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Restore failed or cancelled'),
+                backgroundColor: Colors.orange),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Restore error: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
   }
 }
 

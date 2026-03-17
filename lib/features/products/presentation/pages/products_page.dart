@@ -11,7 +11,7 @@ import 'package:genx_bill/core/services/logger_service.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import 'package:genx_bill/core/widgets/main_layout.dart';
+import 'package:genx_bill/core/providers/navigation_provider.dart';
 
 class ProductsPage extends ConsumerStatefulWidget {
   const ProductsPage({super.key});
@@ -43,10 +43,14 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
                     Row(
                       children: [
                         IconButton(
-                          icon:
-                              const Icon(Icons.arrow_back, color: Colors.white),
+                          icon: Icon(Icons.arrow_back,
+                              color: Theme.of(context).colorScheme.onSurface),
                           onPressed: () {
-                            ref.read(navigationProvider.notifier).state = 0;
+                            if (Navigator.canPop(context)) {
+                              Navigator.pop(context);
+                            } else {
+                              ref.read(navigationProvider.notifier).state = 0;
+                            }
                           },
                           tooltip: 'Back to Home',
                         ),
@@ -76,7 +80,7 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
             const SizedBox(height: 16),
             TextField(
               decoration: InputDecoration(
-                hintText: 'Search products by name or HSN...',
+                hintText: 'Search Name, ID, SKU, HSN or Desc...',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: AppTheme.surfaceColor.withValues(alpha: 0.5),
@@ -103,6 +107,9 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
                               .toLowerCase()
                               .contains(_searchQuery.toLowerCase()) ||
                           product.sku
+                              .toLowerCase()
+                              .contains(_searchQuery.toLowerCase()) ||
+                          product.id
                               .toLowerCase()
                               .contains(_searchQuery.toLowerCase()) ||
                           product.description
@@ -224,16 +231,10 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (product.hsnCode.isNotEmpty)
-                      Text(
-                        'HSN: ${product.hsnCode}',
-                        style: TextStyle(color: Colors.grey[400], fontSize: 12),
-                      ),
-                    if (product.sku.isNotEmpty && product.hsnCode.isEmpty)
-                      Text(
-                        'SKU: ${product.sku}',
-                        style: TextStyle(color: Colors.grey[400], fontSize: 12),
-                      ),
+                    Text(
+                      'ID/SKU: ${product.sku}',
+                      style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                    ),
                   ],
                 ),
               ),
@@ -337,8 +338,8 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
                     Expanded(
                         child: TextField(
                             controller: skuController,
-                            decoration:
-                                const InputDecoration(labelText: 'HSN/SKU'))),
+                            decoration: const InputDecoration(
+                                labelText: 'Product ID / SKU'))),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -473,8 +474,8 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
                     Expanded(
                         child: TextField(
                             controller: skuController,
-                            decoration:
-                                const InputDecoration(labelText: 'HSN/SKU'))),
+                            decoration: const InputDecoration(
+                                labelText: 'Product ID / SKU'))),
                   ],
                 ),
                 const SizedBox(height: 16),

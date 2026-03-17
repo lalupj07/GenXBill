@@ -22,6 +22,13 @@ class InvoiceRepository {
   Future<void> deleteInvoice(String id) async {
     await _box.delete(id);
   }
+
+  List<Invoice> getInvoicesByClientName(String clientName) {
+    return _box.values
+        .where((invoice) =>
+            invoice.clientName.toLowerCase() == clientName.toLowerCase())
+        .toList();
+  }
 }
 
 final invoiceBoxProvider = Provider<Box<Invoice>>((ref) {

@@ -25,6 +25,26 @@ class InvoiceTemplateAdapter extends TypeAdapter<InvoiceTemplate> {
         return InvoiceTemplate.gst;
       case 5:
         return InvoiceTemplate.creative;
+      case 6:
+        return InvoiceTemplate.professional;
+      case 7:
+        return InvoiceTemplate.executive;
+      case 8:
+        return InvoiceTemplate.corporate;
+      case 9:
+        return InvoiceTemplate.elegant;
+      case 10:
+        return InvoiceTemplate.standard;
+      case 11:
+        return InvoiceTemplate.enterprise;
+      case 12:
+        return InvoiceTemplate.compact;
+      case 13:
+        return InvoiceTemplate.detailed;
+      case 14:
+        return InvoiceTemplate.retail;
+      case 15:
+        return InvoiceTemplate.service;
       default:
         return InvoiceTemplate.modern;
     }
@@ -50,6 +70,36 @@ class InvoiceTemplateAdapter extends TypeAdapter<InvoiceTemplate> {
         break;
       case InvoiceTemplate.creative:
         writer.writeByte(5);
+        break;
+      case InvoiceTemplate.professional:
+        writer.writeByte(6);
+        break;
+      case InvoiceTemplate.executive:
+        writer.writeByte(7);
+        break;
+      case InvoiceTemplate.corporate:
+        writer.writeByte(8);
+        break;
+      case InvoiceTemplate.elegant:
+        writer.writeByte(9);
+        break;
+      case InvoiceTemplate.standard:
+        writer.writeByte(10);
+        break;
+      case InvoiceTemplate.enterprise:
+        writer.writeByte(11);
+        break;
+      case InvoiceTemplate.compact:
+        writer.writeByte(12);
+        break;
+      case InvoiceTemplate.detailed:
+        writer.writeByte(13);
+        break;
+      case InvoiceTemplate.retail:
+        writer.writeByte(14);
+        break;
+      case InvoiceTemplate.service:
+        writer.writeByte(15);
         break;
     }
   }

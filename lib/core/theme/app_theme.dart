@@ -23,6 +23,26 @@ class AppTheme {
         color: Colors.white, fontWeight: FontWeight.bold, fontSize: 32),
   );
 
+  static final TextTheme lightTextTheme = GoogleFonts.outfitTextTheme(
+    ThemeData.light().textTheme,
+  ).copyWith(
+    bodyLarge: GoogleFonts.outfit(color: const Color(0xFF1E293B)), // Slate 800
+    bodyMedium: GoogleFonts.outfit(color: const Color(0xFF334155)), // Slate 700
+    bodySmall: GoogleFonts.outfit(color: const Color(0xFF475569)), // Slate 600
+    titleLarge: GoogleFonts.lexend(
+        color: const Color(0xFF0F172A),
+        fontWeight: FontWeight.bold,
+        fontSize: 28),
+    titleMedium: GoogleFonts.lexend(
+        color: const Color(0xFF1E293B),
+        fontWeight: FontWeight.w600,
+        fontSize: 18),
+    displayLarge: GoogleFonts.lexend(
+        color: const Color(0xFF0F172A),
+        fontWeight: FontWeight.bold,
+        fontSize: 32),
+  );
+
   static final ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
@@ -83,15 +103,16 @@ class AppTheme {
       secondary: secondaryColor,
       surface: Colors.white,
       error: errorColor,
+      onSurface: Color(0xFF0F172A), // Slate 900
     ),
-    textTheme: GoogleFonts.outfitTextTheme(ThemeData.light().textTheme),
+    textTheme: lightTextTheme,
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,
       elevation: 0,
       centerTitle: true,
       titleTextStyle: TextStyle(
-          color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
-      iconTheme: IconThemeData(color: Colors.black),
+          color: Color(0xFF0F172A), fontSize: 20, fontWeight: FontWeight.bold),
+      iconTheme: IconThemeData(color: Color(0xFF0F172A)),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -106,20 +127,22 @@ class AppTheme {
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: Colors.black.withValues(alpha: 0.05),
+      fillColor: const Color(0xFFF1F5F9), // Slate 100
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.1)),
+        borderSide: const BorderSide(color: Color(0xFFCBD5E1)), // Slate 300
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: primaryColor),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      labelStyle: const TextStyle(color: Color(0xFF64748B)), // Slate 500
+      hintStyle: const TextStyle(color: Color(0xFF94A3B8)), // Slate 400
     ),
   );
 }

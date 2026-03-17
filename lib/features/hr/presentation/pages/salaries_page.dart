@@ -183,16 +183,37 @@ class _SalariesPageState extends ConsumerState<SalariesPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  DropdownButtonFormField<HREmployee>(
-                    decoration: const InputDecoration(labelText: 'Employee *'),
-                    items: employeesList.map((e) {
-                      return DropdownMenuItem(value: e, child: Text(e.name));
-                    }).toList(),
-                    onChanged: (val) {
-                      selectedEmployee = val;
-                      if (val != null) {
-                        amountController.text = val.salary.toString();
+                  Autocomplete<HREmployee>(
+                    displayStringForOption: (e) => e.name,
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      if (textEditingValue.text == '') {
+                        return const Iterable<HREmployee>.empty();
                       }
+                      return employeesList.where((e) {
+                        return e.name
+                            .toLowerCase()
+                            .contains(textEditingValue.text.toLowerCase());
+                      });
+                    },
+                    onSelected: (val) {
+                      setDialogState(() {
+                        selectedEmployee = val;
+                        amountController.text = val.salary.toString();
+                      });
+                    },
+                    fieldViewBuilder:
+                        (context, controller, focusNode, onFieldSubmitted) {
+                      return TextFormField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        decoration: const InputDecoration(
+                          labelText: 'Employee (Search Name) *',
+                          prefixIcon: Icon(Icons.person_search),
+                        ),
+                        validator: (v) => selectedEmployee == null
+                            ? 'Select an employee'
+                            : null,
+                      );
                     },
                   ),
                   const SizedBox(height: 16),

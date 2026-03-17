@@ -3,7 +3,8 @@ import '../data/repositories/employee_repository.dart';
 import '../data/repositories/attendance_repository.dart';
 import '../data/repositories/leave_repository.dart';
 import '../data/repositories/hr_repositories.dart';
-import '../data/models/employee_model.dart';
+import 'package:genx_bill/features/hr/data/models/employee_model.dart';
+import 'package:genx_bill/features/hr/data/models/attendance_model.dart';
 
 // Repository Providers
 final employeeRepositoryProvider = Provider<EmployeeRepository>((ref) {
@@ -37,19 +38,42 @@ final selectedMonthProvider = StateProvider<DateTime>((ref) => DateTime.now());
 
 final selectedYearProvider = StateProvider<int>((ref) => DateTime.now().year);
 
-// Computed Providers
-final activeEmployeesProvider = Provider<List<HREmployee>>((ref) {
-  final repo = ref.watch(employeeRepositoryProvider);
-  return repo.getActiveEmployees();
+// --- Reactive Stream Providers ---
+
+final employeesStreamProvider = StreamProvider<List<HREmployee>>((ref) {
+  final box = ref.watch(employeeRepositoryProvider).box;
+  return box.watch().map((_) => box.values.toList());
+});
+
+final attendanceStreamProvider = StreamProvider<List<Attendance>>((ref) {
+  final box = ref.watch(attendanceRepositoryProvider).box;
+  return box.watch().map((_) => box.values.toList());
+});
+
+// --- Computed Providers (Synchronous for easier UI usage) ---
+
+final attendanceProvider = Provider<List<Attendance>>((ref) {
+  final repo = ref.watch(attendanceRepositoryProvider);
+  // Watch the stream to trigger rebuilds, but return current values immediately
+  ref.watch(attendanceStreamProvider);
+  return repo.box.values.toList();
 });
 
 final allEmployeesProvider = Provider<List<HREmployee>>((ref) {
   final repo = ref.watch(employeeRepositoryProvider);
-  return repo.getAllEmployees();
+  // Watch the stream to trigger rebuilds
+  ref.watch(employeesStreamProvider);
+  return repo.box.values.toList();
+});
+
+final activeEmployeesProvider = Provider<List<HREmployee>>((ref) {
+  final employees = ref.watch(allEmployeesProvider);
+  return employees.where((emp) => emp.status == EmployeeStatus.active).toList();
 });
 
 final pendingLeavesProvider = Provider((ref) {
   final repo = ref.watch(leaveRepositoryProvider);
+  // We should ideally have a stream for leaves too, but let's start with these.
   return repo.getPendingLeaves();
 });
 
@@ -70,14 +94,24 @@ final upcomingHolidaysProvider = Provider((ref) {
 
 // Dashboard Statistics Provider
 final hrDashboardStatsProvider = Provider((ref) {
-  final employeeRepo = ref.watch(employeeRepositoryProvider);
+  final employees = ref.watch(allEmployeesProvider);
+  final attendance = ref.watch(attendanceProvider);
   final leaveRepo = ref.watch(leaveRepositoryProvider);
-  final attendanceRepo = ref.watch(attendanceRepositoryProvider);
+
+  final today = DateTime.now();
+  final todayPresent = attendance
+      .where((att) =>
+          att.date.year == today.year &&
+          att.date.month == today.month &&
+          att.date.day == today.day)
+      .length;
 
   return {
-    'totalEmployees': employeeRepo.getTotalEmployees(),
-    'activeEmployees': employeeRepo.getActiveEmployeesCount(),
-    'pendingLeaves': leaveRepo.getPendingLeaves().length,
-    'todayPresent': attendanceRepo.getTodayAttendance().length,
+    'totalEmployees': employees.length,
+    'activeEmployees':
+        employees.where((e) => e.status == EmployeeStatus.active).length,
+    'pendingLeaves':
+        leaveRepo.getPendingLeaves().length, // Not yet reactive to box changes
+    'todayPresent': todayPresent,
   };
 });

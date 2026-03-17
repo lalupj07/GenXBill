@@ -133,6 +133,54 @@ class StockMovement extends HiveObject {
       type == MovementType.sale ||
       type == MovementType.damage ||
       type == MovementType.adjustment && stockChange < 0;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'inventoryItemId': inventoryItemId,
+      'productId': productId,
+      'productName': productName,
+      'type': type.index,
+      'quantity': quantity,
+      'previousStock': previousStock,
+      'newStock': newStock,
+      'fromLocation': fromLocation,
+      'toLocation': toLocation,
+      'referenceId': referenceId,
+      'referenceType': referenceType,
+      'reason': reason,
+      'timestamp': timestamp.toIso8601String(),
+      'performedBy': performedBy,
+      'notes': notes,
+      'costPrice': costPrice,
+      'sellingPrice': sellingPrice,
+      'metadata': metadata,
+    };
+  }
+
+  factory StockMovement.fromJson(Map<String, dynamic> json) {
+    return StockMovement(
+      id: json['id'] as String,
+      inventoryItemId: json['inventoryItemId'] as String,
+      productId: json['productId'] as String,
+      productName: json['productName'] as String,
+      type: MovementType.values[json['type'] as int],
+      quantity: (json['quantity'] as num).toDouble(),
+      previousStock: (json['previousStock'] as num).toDouble(),
+      newStock: (json['newStock'] as num).toDouble(),
+      fromLocation: json['fromLocation'] as String?,
+      toLocation: json['toLocation'] as String?,
+      referenceId: json['referenceId'] as String?,
+      referenceType: json['referenceType'] as String?,
+      reason: json['reason'] as String,
+      timestamp: DateTime.parse(json['timestamp'] as String),
+      performedBy: json['performedBy'] as String,
+      notes: json['notes'] as String?,
+      costPrice: (json['costPrice'] as num?)?.toDouble(),
+      sellingPrice: (json['sellingPrice'] as num?)?.toDouble(),
+      metadata: json['metadata'] as Map<String, dynamic>?,
+    );
+  }
 }
 
 @HiveType(typeId: 23)

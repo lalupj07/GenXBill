@@ -17,7 +17,9 @@ class AppSettings extends HiveObject {
   String? bankName;
   String? bankAccountNumber;
   String? bankRoutingNumber;
+  String? bankIfscCode;
   String currency;
+  String? termsAndConditions;
   String language;
   String themeMode; // 'light', 'dark', 'system'
   String? emailSignature;
@@ -30,6 +32,7 @@ class AppSettings extends HiveObject {
   int? smtpPort;
   String? smtpUsername;
   String? smtpPassword;
+  double uiScale;
 
   AppSettings({
     this.companyName = 'GenXis Inc',
@@ -46,7 +49,9 @@ class AppSettings extends HiveObject {
     this.bankName,
     this.bankAccountNumber,
     this.bankRoutingNumber,
+    this.bankIfscCode,
     this.currency = 'INR',
+    this.termsAndConditions,
     this.language = 'English',
     this.themeMode = 'dark',
     this.emailSignature,
@@ -59,6 +64,7 @@ class AppSettings extends HiveObject {
     this.smtpPort = 587,
     this.smtpUsername,
     this.smtpPassword,
+    this.uiScale = 1.0,
   });
 
   AppSettings copyWith({
@@ -76,7 +82,9 @@ class AppSettings extends HiveObject {
     String? bankName,
     String? bankAccountNumber,
     String? bankRoutingNumber,
+    String? bankIfscCode,
     String? currency,
+    String? termsAndConditions,
     String? language,
     String? themeMode,
     String? emailSignature,
@@ -89,6 +97,7 @@ class AppSettings extends HiveObject {
     int? smtpPort,
     String? smtpUsername,
     String? smtpPassword,
+    double? uiScale,
   }) {
     return AppSettings(
       companyName: companyName ?? this.companyName,
@@ -105,7 +114,9 @@ class AppSettings extends HiveObject {
       bankName: bankName ?? this.bankName,
       bankAccountNumber: bankAccountNumber ?? this.bankAccountNumber,
       bankRoutingNumber: bankRoutingNumber ?? this.bankRoutingNumber,
+      bankIfscCode: bankIfscCode ?? this.bankIfscCode,
       currency: currency ?? this.currency,
+      termsAndConditions: termsAndConditions ?? this.termsAndConditions,
       language: language ?? this.language,
       themeMode: themeMode ?? this.themeMode,
       emailSignature: emailSignature ?? this.emailSignature,
@@ -118,6 +129,7 @@ class AppSettings extends HiveObject {
       smtpPort: smtpPort ?? this.smtpPort,
       smtpUsername: smtpUsername ?? this.smtpUsername,
       smtpPassword: smtpPassword ?? this.smtpPassword,
+      uiScale: uiScale ?? this.uiScale,
     );
   }
 }
@@ -133,41 +145,43 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return AppSettings(
-      companyName: fields[0] as String? ?? 'GenXis Inc',
-      companyAddress: fields[1] as String? ?? '',
-      companyPhone: fields[2] as String? ?? '',
-      companyEmail: fields[3] as String? ?? '',
-      companyWebsite: fields[4] as String?,
-      companyLogo: fields[5] as String?,
-      taxId: fields[6] as String?,
-      taxRate: fields[7] as double? ?? 0.10,
-      invoicePrefix: fields[8] as String? ?? 'INV-',
-      invoiceStartNumber: fields[9] as int? ?? 1000,
-      defaultPaymentTerms: fields[10] as String? ?? 'Net 30',
-      bankName: fields[11] as String?,
-      bankAccountNumber: fields[12] as String?,
-      bankRoutingNumber: fields[13] as String?,
-      currency: fields[14] as String? ?? 'INR',
-      language: fields[15] as String? ?? 'English',
-      themeMode: fields[16] as String? ?? 'dark',
-      emailSignature: fields[17] as String?,
-      defaultTemplate: fields[18] as InvoiceTemplate? ?? InvoiceTemplate.modern,
+      companyName: (fields.containsKey(0) && fields[0] != null) ? fields[0] as String : 'GenXis Inc',
+      companyAddress: (fields.containsKey(1) && fields[1] != null) ? fields[1] as String : '',
+      companyPhone: (fields.containsKey(2) && fields[2] != null) ? fields[2] as String : '',
+      companyEmail: (fields.containsKey(3) && fields[3] != null) ? fields[3] as String : '',
+      companyWebsite: fields.containsKey(4) ? fields[4] as String? : null,
+      companyLogo: fields.containsKey(5) ? fields[5] as String? : null,
+      taxId: fields.containsKey(6) ? fields[6] as String? : null,
+      taxRate: (fields.containsKey(7) && fields[7] != null) ? fields[7] as double : 0.10,
+      invoicePrefix: (fields.containsKey(8) && fields[8] != null) ? fields[8] as String : 'INV-',
+      invoiceStartNumber: (fields.containsKey(9) && fields[9] != null) ? fields[9] as int : 1000,
+      defaultPaymentTerms: (fields.containsKey(10) && fields[10] != null) ? fields[10] as String : 'Net 30',
+      bankName: fields.containsKey(11) ? fields[11] as String? : null,
+      bankAccountNumber: fields.containsKey(12) ? fields[12] as String? : null,
+      bankRoutingNumber: fields.containsKey(13) ? fields[13] as String? : null,
+      bankIfscCode: fields.containsKey(28) ? fields[28] as String? : null,
+      currency: (fields.containsKey(14) && fields[14] != null) ? fields[14] as String : 'INR',
+      termsAndConditions: fields.containsKey(29) ? fields[29] as String? : null,
+      language: (fields.containsKey(15) && fields[15] != null) ? fields[15] as String : 'English',
+      themeMode: (fields.containsKey(16) && fields[16] != null) ? fields[16] as String : 'dark',
+      emailSignature: fields.containsKey(17) ? fields[17] as String? : null,
+      defaultTemplate: (fields.containsKey(18) && fields[18] != null) ? fields[18] as InvoiceTemplate : InvoiceTemplate.modern,
       companySignature: fields.containsKey(19) ? fields[19] as String? : null,
       companyStamp: fields.containsKey(20) ? fields[20] as String? : null,
-      currentUserRole:
-          fields.containsKey(21) ? fields[21] as UserRole : UserRole.admin,
+      currentUserRole: (fields.containsKey(21) && fields[21] != null) ? fields[21] as UserRole : UserRole.admin,
       passcode: fields.containsKey(22) ? fields[22] as String? : null,
       smtpServer: fields.containsKey(23) ? fields[23] as String? : null,
-      smtpPort: fields.containsKey(24) ? fields[24] as int? : 587,
+      smtpPort: (fields.containsKey(24) && fields[24] != null) ? fields[24] as int : 587,
       smtpUsername: fields.containsKey(25) ? fields[25] as String? : null,
       smtpPassword: fields.containsKey(26) ? fields[26] as String? : null,
+      uiScale: (fields.containsKey(27) && fields[27] != null) ? fields[27] as double : 1.0,
     );
   }
 
   @override
   void write(BinaryWriter writer, AppSettings obj) {
     writer
-      ..writeByte(27)
+      ..writeByte(30)
       ..writeByte(0)
       ..write(obj.companyName)
       ..writeByte(1)
@@ -221,6 +235,12 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       ..writeByte(25)
       ..write(obj.smtpUsername)
       ..writeByte(26)
-      ..write(obj.smtpPassword);
+      ..write(obj.smtpPassword)
+      ..writeByte(27)
+      ..write(obj.uiScale)
+      ..writeByte(28)
+      ..write(obj.bankIfscCode)
+      ..writeByte(29)
+      ..write(obj.termsAndConditions);
   }
 }

@@ -13,6 +13,7 @@ import 'package:genx_bill/features/payments/presentation/widgets/payment_history
 import 'package:genx_bill/features/payments/data/repositories/payment_repository.dart';
 import 'package:uuid/uuid.dart';
 import 'package:genx_bill/core/widgets/theme_background.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class InvoiceDetailPage extends ConsumerWidget {
   final Invoice invoice;
@@ -33,6 +34,11 @@ class InvoiceDetailPage extends ConsumerWidget {
                   icon: const Icon(Icons.picture_as_pdf),
                   tooltip: 'Export PDF',
                   onPressed: () => _exportPDF(context, ref),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.share, color: Colors.green),
+                  tooltip: 'Share on WhatsApp',
+                  onPressed: () => _shareOnWhatsApp(context, ref),
                 ),
                 PopupMenuButton(
                   itemBuilder: (context) => [
@@ -658,6 +664,31 @@ class InvoiceDetailPage extends ConsumerWidget {
           ),
         );
         break;
+    }
+  }
+
+  Future<void> _shareOnWhatsApp(BuildContext context, WidgetRef ref) async {
+    final settings = ref.read(settingsProvider);
+    final message = "Hello ${invoice.clientName}, "
+        "here is your invoice #${invoice.invoiceNumber} for ${settings.currency} ${invoice.total.toStringAsFixed(2)}. "
+        "Please find the details attached.";
+
+    final url =
+        Uri.parse("https://wa.me/?text=${Uri.encodeComponent(message)}");
+
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        // Fallback or try simpler URL if canLaunch fails (sometimes returns false on Android 11+)
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not launch WhatsApp: $e')),
+        );
+      }
     }
   }
 }

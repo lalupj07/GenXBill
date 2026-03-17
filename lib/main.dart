@@ -39,6 +39,11 @@ import 'package:genx_bill/core/utils/locale_utils.dart';
 import 'package:genx_bill/features/inventory/data/models/inventory_item_model.dart';
 import 'package:genx_bill/features/inventory/data/models/stock_movement_model.dart';
 import 'package:genx_bill/features/inventory/data/models/reorder_suggestion_model.dart';
+import 'package:genx_bill/features/orders/data/models/order_model.dart';
+
+// Feature Module imports - Invoice Themes & Payment Reminders
+import 'package:genx_bill/features/invoices/data/models/invoice_theme.dart';
+import 'package:genx_bill/features/reminders/data/models/payment_reminder.dart';
 
 void main() async {
   await Hive.initFlutter();
@@ -65,93 +70,160 @@ void main() async {
     await Hive.deleteBoxFromDisk('inventory_items');
     await Hive.deleteBoxFromDisk('stock_movements');
     await Hive.deleteBoxFromDisk('reorder_suggestions');
-    await Hive.deleteBoxFromDisk('salary_records'); // Just in case
-    await Hive.deleteBoxFromDisk('digital_assets');
-    await Hive.deleteBoxFromDisk('attendance');
+    await Hive.deleteBoxFromDisk('orders');
+    await Hive.deleteBoxFromDisk('hr_employees');
+    await Hive.deleteBoxFromDisk('payslips');
+    await Hive.deleteBoxFromDisk('inventory_transactions');
+    await Hive.deleteBoxFromDisk('invoice_themes');
+    await Hive.deleteBoxFromDisk('payment_reminders');
   } catch (e) {
     // ignore: avoid_print
     print('Error clearing boxes: $e');
   }
 
-  Hive.registerAdapter(InvoiceAdapter());
-  Hive.registerAdapter(InvoiceItemAdapter());
-  Hive.registerAdapter(InvoiceStatusAdapter());
-  Hive.registerAdapter(ClientAdapter());
-  Hive.registerAdapter(AppSettingsAdapter());
-  Hive.registerAdapter(PaymentAdapter());
-  Hive.registerAdapter(ExpenseAdapter());
-  Hive.registerAdapter(ExpenseCategoryAdapter());
-  Hive.registerAdapter(InvoiceTemplateAdapter());
-  Hive.registerAdapter(ProductAdapter());
-  Hive.registerAdapter(EmployeeAdapter());
-  Hive.registerAdapter(UserRoleAdapter());
-  Hive.registerAdapter(ActivityLogAdapter());
-  Hive.registerAdapter(WarehouseAdapter());
-  Hive.registerAdapter(StockBatchAdapter());
-  Hive.registerAdapter(SalaryRecordAdapter());
-  Hive.registerAdapter(DigitalAssetAdapter());
-  Hive.registerAdapter(InventoryTransactionAdapter());
-  Hive.registerAdapter(TransactionTypeAdapter());
+  try {
+    Hive.registerAdapter(InvoiceAdapter());
+    Hive.registerAdapter(InvoiceItemAdapter());
+    Hive.registerAdapter(InvoiceStatusAdapter());
+    Hive.registerAdapter(ClientAdapter());
+    Hive.registerAdapter(AppSettingsAdapter());
+    Hive.registerAdapter(PaymentAdapter());
+    Hive.registerAdapter(ExpenseAdapter());
+    Hive.registerAdapter(ExpenseCategoryAdapter());
+    Hive.registerAdapter(InvoiceTemplateAdapter());
+    Hive.registerAdapter(ProductAdapter());
+    Hive.registerAdapter(EmployeeAdapter());
+    Hive.registerAdapter(UserRoleAdapter());
+    Hive.registerAdapter(ActivityLogAdapter());
+    Hive.registerAdapter(WarehouseAdapter());
+    Hive.registerAdapter(StockBatchAdapter());
+    Hive.registerAdapter(SalaryRecordAdapter());
+    Hive.registerAdapter(DigitalAssetAdapter());
+    Hive.registerAdapter(InventoryTransactionAdapter());
+    Hive.registerAdapter(TransactionTypeAdapter());
 
-  // HR Module Adapters
-  Hive.registerAdapter(hr.EmployeeStatusAdapter());
-  Hive.registerAdapter(hr.HREmployeeAdapter());
-  Hive.registerAdapter(AttendanceAdapter());
-  Hive.registerAdapter(AttendanceStatusAdapter());
-  Hive.registerAdapter(LeaveAdapter());
-  Hive.registerAdapter(LeaveTypeAdapter());
-  Hive.registerAdapter(LeaveStatusAdapter());
-  Hive.registerAdapter(OvertimeAdapter());
-  Hive.registerAdapter(OvertimeStatusAdapter());
-  Hive.registerAdapter(BonusAdapter());
-  Hive.registerAdapter(BonusTypeAdapter());
-  Hive.registerAdapter(BonusStatusAdapter());
-  Hive.registerAdapter(HolidayAdapter());
-  Hive.registerAdapter(HolidayTypeAdapter());
-  Hive.registerAdapter(PayrollSettingsAdapter());
-  Hive.registerAdapter(EmployeeDocumentAdapter());
-  Hive.registerAdapter(DocumentTypeAdapter());
-  Hive.registerAdapter(PayslipAdapter());
-  Hive.registerAdapter(PayslipStatusAdapter());
+    // HR Module Adapters
+    Hive.registerAdapter(hr.EmployeeStatusAdapter());
+    Hive.registerAdapter(hr.HREmployeeAdapter());
+    Hive.registerAdapter(AttendanceAdapter());
+    Hive.registerAdapter(AttendanceStatusAdapter());
+    Hive.registerAdapter(LeaveAdapter());
+    Hive.registerAdapter(LeaveTypeAdapter());
+    Hive.registerAdapter(LeaveStatusAdapter());
+    Hive.registerAdapter(OvertimeAdapter());
+    Hive.registerAdapter(OvertimeStatusAdapter());
+    Hive.registerAdapter(BonusAdapter());
+    Hive.registerAdapter(BonusTypeAdapter());
+    Hive.registerAdapter(BonusStatusAdapter());
+    Hive.registerAdapter(HolidayAdapter());
+    Hive.registerAdapter(HolidayTypeAdapter());
+    Hive.registerAdapter(PayrollSettingsAdapter());
+    Hive.registerAdapter(EmployeeDocumentAdapter());
+    Hive.registerAdapter(DocumentTypeAdapter());
+    Hive.registerAdapter(PayslipAdapter());
+    Hive.registerAdapter(PayslipStatusAdapter());
 
-  // Inventory Module Adapters
-  Hive.registerAdapter(InventoryItemAdapter());
-  Hive.registerAdapter(InventoryStatusAdapter());
-  Hive.registerAdapter(StockMovementAdapter());
-  Hive.registerAdapter(MovementTypeAdapter());
-  Hive.registerAdapter(ReorderSuggestionAdapter());
-  Hive.registerAdapter(SuggestionPriorityAdapter());
-  Hive.registerAdapter(ReorderStatusAdapter());
+    // Inventory Module Adapters
+    Hive.registerAdapter(InventoryItemAdapter());
+    Hive.registerAdapter(InventoryStatusAdapter());
+    Hive.registerAdapter(StockMovementAdapter());
+    Hive.registerAdapter(MovementTypeAdapter());
+    Hive.registerAdapter(ReorderSuggestionAdapter());
+    Hive.registerAdapter(SuggestionPriorityAdapter());
+    Hive.registerAdapter(ReorderStatusAdapter());
+    Hive.registerAdapter(OrderTypeAdapter());
+    Hive.registerAdapter(OrderStatusAdapter());
+    Hive.registerAdapter(OrderSourceAdapter());
+    Hive.registerAdapter(OrderItemAdapter());
+    Hive.registerAdapter(OrderModelAdapter());
 
-  await Hive.openBox<Invoice>('invoices');
-  await Hive.openBox<Client>('clients');
-  await Hive.openBox<AppSettings>('settings');
-  await Hive.openBox<Payment>('payments');
-  await Hive.openBox<Expense>('expenses');
-  await Hive.openBox<Product>('products');
-  await Hive.openBox<Employee>('employees');
-  await Hive.openBox<ActivityLog>('activity_logs');
-  await Hive.openBox<Warehouse>('warehouses');
-  await Hive.openBox<StockBatch>('stock_batches');
-  await Hive.openBox<SalaryRecord>('salary_records');
-  await Hive.openBox<DigitalAsset>('digital_assets');
-  await Hive.openBox<InventoryTransaction>('inventory_transactions');
+    // Invoice Theme Adapters
+    Hive.registerAdapter(InvoiceThemeAdapter());
+    Hive.registerAdapter(InvoiceTemplateStyleAdapter());
 
-  // HR Module Boxes
-  await Hive.openBox<hr.HREmployee>('hr_employees');
-  await Hive.openBox<Attendance>('attendance');
-  await Hive.openBox<Leave>('leaves');
-  await Hive.openBox<Overtime>('overtime');
-  await Hive.openBox<Bonus>('bonuses');
-  await Hive.openBox<Holiday>('holidays');
-  await Hive.openBox<Payslip>('payslips');
+    // Payment Reminder Adapters
+    Hive.registerAdapter(PaymentReminderAdapter());
+    Hive.registerAdapter(ReminderScheduleAdapter());
+    Hive.registerAdapter(ReminderTypeAdapter());
+    Hive.registerAdapter(ReminderLogAdapter());
 
-  // Inventory Module Boxes
-  await Hive.openBox<InventoryItem>('inventory_items');
-  await Hive.openBox<StockMovement>('stock_movements');
-  await Hive.openBox<ReorderSuggestion>('reorder_suggestions');
+    await Hive.openBox<Invoice>('invoices');
+    await Hive.openBox<Client>('clients');
+    await Hive.openBox<AppSettings>('settings');
+    await Hive.openBox<Payment>('payments');
+    await Hive.openBox<Expense>('expenses');
+    await Hive.openBox<Product>('products');
+    await Hive.openBox<Employee>('employees');
+    await Hive.openBox<ActivityLog>('activity_logs');
+    await Hive.openBox<Warehouse>('warehouses');
+    await Hive.openBox<StockBatch>('stock_batches');
+    await Hive.openBox<SalaryRecord>('salary_records');
+    await Hive.openBox<DigitalAsset>('digital_assets');
+    await Hive.openBox<InventoryTransaction>('inventory_transactions');
 
-  runApp(const ProviderScope(child: GenXBillApp()));
+    // HR Module Boxes
+    await Hive.openBox<hr.HREmployee>('hr_employees');
+    await Hive.openBox<Attendance>('attendance');
+    await Hive.openBox<Leave>('leaves');
+    await Hive.openBox<Overtime>('overtime');
+    await Hive.openBox<Bonus>('bonuses');
+    await Hive.openBox<Holiday>('holidays');
+    await Hive.openBox<Payslip>('payslips');
+
+    // Inventory Module Boxes
+    await Hive.openBox<InventoryItem>('inventory_items');
+    await Hive.openBox<StockMovement>('stock_movements');
+    await Hive.openBox<ReorderSuggestion>('reorder_suggestions');
+    await Hive.openBox<OrderModel>('orders');
+
+    // Feature Module Boxes
+    await Hive.openBox<InvoiceTheme>('invoice_themes');
+    await Hive.openBox<PaymentReminder>('payment_reminders');
+
+    // Initialize predefined themes if empty
+    final themesBox = Hive.box<InvoiceTheme>('invoice_themes');
+    if (themesBox.isEmpty) {
+      for (var theme in InvoiceTheme.predefinedThemes) {
+        await themesBox.put(theme.id, theme);
+      }
+    }
+
+    runApp(const ProviderScope(child: GenXBillApp()));
+  } catch (e) {
+    // ignore: avoid_print
+    print('Initialization Error: $e');
+    runApp(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                const SizedBox(height: 16),
+                const Text(
+                  'Application Initialization Failed',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Error: $e',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.red),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'Please restart your computer and try again.\nIf the issue persists, contact support.',
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
+  }
 }
 
 class GenXBillApp extends ConsumerWidget {
@@ -179,6 +251,15 @@ class GenXBillApp extends ConsumerWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
+      builder: (context, child) {
+        final mediaQuery = MediaQuery.of(context);
+        return MediaQuery(
+          data: mediaQuery.copyWith(
+            textScaler: TextScaler.linear(settings.uiScale),
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       locale: LocaleUtils.getLocaleFromLanguage(settings.language),
       localizationsDelegates: const [
         AppLocalizations.delegate,

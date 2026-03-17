@@ -7,7 +7,7 @@ import 'package:genx_bill/features/employees/data/repositories/employee_reposito
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import 'package:genx_bill/core/widgets/main_layout.dart';
+import 'package:genx_bill/core/providers/navigation_provider.dart';
 
 class EmployeesPage extends ConsumerStatefulWidget {
   const EmployeesPage({super.key});

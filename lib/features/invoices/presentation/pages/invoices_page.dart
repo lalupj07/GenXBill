@@ -13,10 +13,11 @@ import 'package:genx_bill/l10n/app_localizations.dart';
 import 'package:genx_bill/core/utils/currency_utils.dart';
 import 'package:genx_bill/core/providers/settings_provider.dart';
 
-import 'package:genx_bill/core/widgets/main_layout.dart';
+import 'package:genx_bill/core/providers/navigation_provider.dart';
 
 class InvoicesPage extends ConsumerStatefulWidget {
-  const InvoicesPage({super.key});
+  final InvoiceStatus? initialStatus;
+  const InvoicesPage({super.key, this.initialStatus});
 
   @override
   ConsumerState<InvoicesPage> createState() => _InvoicesPageState();
@@ -25,6 +26,12 @@ class InvoicesPage extends ConsumerStatefulWidget {
 class _InvoicesPageState extends ConsumerState<InvoicesPage> {
   InvoiceStatus? _filterStatus;
   String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _filterStatus = widget.initialStatus;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,10 +59,14 @@ class _InvoicesPageState extends ConsumerState<InvoicesPage> {
                     Row(
                       children: [
                         IconButton(
-                          icon:
-                              const Icon(Icons.arrow_back, color: Colors.white),
+                          icon: Icon(Icons.arrow_back,
+                              color: Theme.of(context).colorScheme.onSurface),
                           onPressed: () {
-                            ref.read(navigationProvider.notifier).state = 0;
+                            if (Navigator.canPop(context)) {
+                              Navigator.pop(context);
+                            } else {
+                              ref.read(navigationProvider.notifier).state = 0;
+                            }
                           },
                           tooltip: AppLocalizations.of(context)!.dashboard,
                         ),

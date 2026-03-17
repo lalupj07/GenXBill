@@ -189,6 +189,56 @@ class InventoryItem extends HiveObject {
   double get profitMargin => sellingPrice - costPrice;
   double get profitMarginPercentage =>
       costPrice > 0 ? ((profitMargin / costPrice) * 100) : 0;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'productId': productId,
+      'productName': productName,
+      'sku': sku,
+      'currentStock': currentStock,
+      'minimumStock': minimumStock,
+      'reorderPoint': reorderPoint,
+      'reorderQuantity': reorderQuantity,
+      'batchNumber': batchNumber,
+      'serialNumber': serialNumber,
+      'location': location,
+      'warehouse': warehouse,
+      'costPrice': costPrice,
+      'sellingPrice': sellingPrice,
+      'expiryDate': expiryDate?.toIso8601String(),
+      'lastUpdated': lastUpdated.toIso8601String(),
+      'updatedBy': updatedBy,
+      'status': status.index,
+      'metadata': metadata,
+    };
+  }
+
+  factory InventoryItem.fromJson(Map<String, dynamic> json) {
+    return InventoryItem(
+      id: json['id'] as String,
+      productId: json['productId'] as String,
+      productName: json['productName'] as String,
+      sku: json['sku'] as String,
+      currentStock: (json['currentStock'] as num).toDouble(),
+      minimumStock: (json['minimumStock'] as num).toDouble(),
+      reorderPoint: (json['reorderPoint'] as num).toDouble(),
+      reorderQuantity: (json['reorderQuantity'] as num).toDouble(),
+      batchNumber: json['batchNumber'] as String?,
+      serialNumber: json['serialNumber'] as String?,
+      location: json['location'] as String,
+      warehouse: json['warehouse'] as String?,
+      costPrice: (json['costPrice'] as num).toDouble(),
+      sellingPrice: (json['sellingPrice'] as num).toDouble(),
+      expiryDate: json['expiryDate'] != null
+          ? DateTime.parse(json['expiryDate'] as String)
+          : null,
+      lastUpdated: DateTime.parse(json['lastUpdated'] as String),
+      updatedBy: json['updatedBy'] as String,
+      status: InventoryStatus.values[json['status'] as int],
+      metadata: json['metadata'] as Map<String, dynamic>?,
+    );
+  }
 }
 
 @HiveType(typeId: 21)

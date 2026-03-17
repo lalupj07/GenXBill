@@ -1,4 +1,4 @@
-# GenXBill v5.1.0 Installer Builder
+# GenXBill v5.2.0 Installer Builder
 # Creates both MSIX and Setup package
 
 param(
@@ -8,7 +8,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "GenXBill v5.1.0 Installer Builder" -ForegroundColor Cyan
+Write-Host "GenXBill v5.2.0 Installer Builder" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -27,8 +27,8 @@ Write-Host ""
 # Create Setup ZIP Package
 Write-Host "[2/4] Creating Setup Package..." -ForegroundColor Green
 
-$setupFolder = "GenXBill_Setup_v5.1.0"
-$setupZip = "GenXBill_Setup_v5.1.0.zip"
+$setupFolder = "GenXBill_Setup_v5.2.0"
+$setupZip = "GenXBill_Setup_v5.2.0.zip"
 
 # Clean previous builds
 if (Test-Path $setupFolder) {
@@ -55,16 +55,16 @@ Copy-Item -Path "README_INSTALLATION.md" -Destination "$setupFolder\" -Force -Er
 # Create a simple launcher
 $launcherContent = @"
 @echo off
-title GenXBill v5.1.0 Setup
+title GenXBill v5.2.0 Setup
 color 0B
 cls
 echo.
 echo  ========================================
-echo   GenXBill v5.1.0 Setup
+echo   GenXBill v5.2.0 Setup
 echo   GenXis Inc - Billing Made Simple
 echo  ========================================
 echo.
-echo  This package contains GenXBill v5.1.0
+echo  This package contains GenXBill v5.2.0
 echo.
 echo  Installation Options:
 echo  ---------------------
@@ -163,7 +163,7 @@ If the app shows "Application Initialization Failed":
 
 For issues or questions, contact GenXis Inc.
 
-Version: 5.0.0
+Version: 5.2.0
 Build Date: $(Get-Date -Format "yyyy-MM-dd")
 "@
 
@@ -185,8 +185,8 @@ if (Test-Path $msixPath) {
     Write-Host "      Found: $msixPath ($msixSize MB)" -ForegroundColor Green
     
     # Copy MSIX to root for easy access
-    Copy-Item -Path $msixPath -Destination "GenXBill_v5.1.0.msix" -Force
-    Write-Host "      Copied to: GenXBill_v5.1.0.msix" -ForegroundColor Green
+    Copy-Item -Path $msixPath -Destination "GenXBill_v5.2.0.msix" -Force
+    Write-Host "      Copied to: GenXBill_v5.2.0.msix" -ForegroundColor Green
 } else {
     Write-Host "      MSIX not found (run 'flutter pub run msix:create' to build)" -ForegroundColor Yellow
 }
@@ -206,9 +206,9 @@ if (Test-Path $setupZip) {
     Write-Host ""
 }
 
-if (Test-Path "GenXBill_v5.1.0.msix") {
-    $msixSize = [math]::Round((Get-Item "GenXBill_v5.1.0.msix").Length / 1MB, 2)
-    Write-Host "  [MSIX] GenXBill_v5.1.0.msix" -ForegroundColor Green
+if (Test-Path "GenXBill_v5.2.0.msix") {
+    $msixSize = [math]::Round((Get-Item "GenXBill_v5.2.0.msix").Length / 1MB, 2)
+    Write-Host "  [MSIX] GenXBill_v5.2.0.msix" -ForegroundColor Green
     Write-Host "         Size: $msixSize MB" -ForegroundColor Gray
     Write-Host "         Type: Microsoft Store package" -ForegroundColor Gray
     Write-Host ""

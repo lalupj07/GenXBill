@@ -12,6 +12,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:genx_bill/core/widgets/theme_background.dart';
+import 'package:genx_bill/features/hr/presentation/pages/add_employee_page.dart';
 
 class AttendancePage extends ConsumerStatefulWidget {
   const AttendancePage({super.key});
@@ -168,6 +169,8 @@ class _AttendancePageState extends ConsumerState<AttendancePage> {
   }
 
   Widget _buildEmptyState() {
+    final employees = ref.watch(allEmployeesProvider);
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -180,6 +183,25 @@ class _AttendancePageState extends ConsumerState<AttendancePage> {
             style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.5), fontSize: 16),
           ),
+          const SizedBox(height: 24),
+          if (employees.isEmpty)
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const AddEmployeePage()),
+                );
+              },
+              icon: const Icon(Icons.person_add),
+              label: const Text('Add First Employee'),
+            )
+          else
+            ElevatedButton.icon(
+              onPressed: () => _showAddAttendanceDialog(context),
+              icon: const Icon(Icons.add),
+              label: const Text('Add Today\'s Check-in'),
+            ),
         ],
       ),
     );
@@ -336,23 +358,37 @@ class _AttendancePageState extends ConsumerState<AttendancePage> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            DropdownButtonFormField<String>(
-              initialValue: selectedEmployeeId,
-              dropdownColor: const Color(0xFF2D2A5D),
-              style: const TextStyle(color: Colors.white),
-              items: employees.map((e) {
-                return DropdownMenuItem(
-                  value: e.id,
-                  child: Text(e.name),
+            Autocomplete<HREmployee>(
+              displayStringForOption: (e) => e.name,
+              optionsBuilder: (TextEditingValue textEditingValue) {
+                if (textEditingValue.text == '') {
+                  return const Iterable<HREmployee>.empty();
+                }
+                return employees.where((e) {
+                  return e.name
+                      .toLowerCase()
+                      .contains(textEditingValue.text.toLowerCase());
+                });
+              },
+              onSelected: (val) => selectedEmployeeId = val.id,
+              fieldViewBuilder:
+                  (context, controller, focusNode, onFieldSubmitted) {
+                return TextFormField(
+                  controller: controller,
+                  focusNode: focusNode,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    labelText: 'Employee (Search Name) *',
+                    labelStyle: TextStyle(color: Colors.white70),
+                    prefixIcon:
+                        Icon(Icons.person_search, color: Colors.white70),
+                    enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white30)),
+                  ),
+                  validator: (v) =>
+                      selectedEmployeeId == null ? 'Select an employee' : null,
                 );
-              }).toList(),
-              onChanged: (val) => selectedEmployeeId = val,
-              decoration: const InputDecoration(
-                labelText: 'Employee',
-                labelStyle: TextStyle(color: Colors.white70),
-                enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white30)),
-              ),
+              },
             ),
             // Date/Time pickers could go here
           ],

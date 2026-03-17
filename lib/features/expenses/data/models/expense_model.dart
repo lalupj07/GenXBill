@@ -83,4 +83,28 @@ class Expense {
         return 'Other';
     }
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'description': description,
+      'amount': amount,
+      'date': date.toIso8601String(),
+      'category': category.index,
+      'notes': notes,
+      'vendor': vendor,
+    };
+  }
+
+  factory Expense.fromJson(Map<String, dynamic> json) {
+    return Expense(
+      id: json['id'] as String,
+      description: json['description'] as String,
+      amount: (json['amount'] as num).toDouble(),
+      date: DateTime.parse(json['date'] as String),
+      category: ExpenseCategory.values[json['category'] as int],
+      notes: json['notes'] as String?,
+      vendor: json['vendor'] as String?,
+    );
+  }
 }

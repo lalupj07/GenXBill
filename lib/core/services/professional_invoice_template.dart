@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:intl/intl.dart';
@@ -7,16 +6,16 @@ import '../models/app_settings.dart';
 import '../../features/invoices/data/models/invoice_model.dart';
 
 /// Professional GST Invoice Template - Exact match to reference format
-/// Complete A4 format with all details: Logo, GSTIN, Party/Shipping Details, 
+/// Complete A4 format with all details: Logo, GSTIN, Party/Shipping Details,
 /// HSN/SAC Codes, Tax Breakdown, Bank Details, Terms & Conditions, Signature
 class ProfessionalInvoiceTemplate {
-  
-  static Future<pw.Widget> buildInvoice(Invoice invoice, AppSettings settings) async {
+  static Future<pw.Widget> buildInvoice(
+      Invoice invoice, AppSettings settings) async {
     // Load images if available
     pw.MemoryImage? logoImage;
     pw.MemoryImage? signatureImage;
     pw.MemoryImage? stampImage;
-    
+
     try {
       if (settings.companyLogo != null && settings.companyLogo!.isNotEmpty) {
         final logoFile = File(settings.companyLogo!);
@@ -24,14 +23,15 @@ class ProfessionalInvoiceTemplate {
           logoImage = pw.MemoryImage(await logoFile.readAsBytes());
         }
       }
-      
-      if (settings.companySignature != null && settings.companySignature!.isNotEmpty) {
+
+      if (settings.companySignature != null &&
+          settings.companySignature!.isNotEmpty) {
         final signatureFile = File(settings.companySignature!);
         if (await signatureFile.exists()) {
           signatureImage = pw.MemoryImage(await signatureFile.readAsBytes());
         }
       }
-      
+
       if (settings.companyStamp != null && settings.companyStamp!.isNotEmpty) {
         final stampFile = File(settings.companyStamp!);
         if (await stampFile.exists()) {
@@ -41,7 +41,7 @@ class ProfessionalInvoiceTemplate {
     } catch (e) {
       // Ignore image loading errors
     }
-    
+
     return pw.Container(
       decoration: pw.BoxDecoration(
         border: pw.Border.all(color: PdfColors.black, width: 2),
@@ -51,49 +51,50 @@ class ProfessionalInvoiceTemplate {
         children: [
           // Top: GSTIN and Original Label
           _buildTopBar(settings, invoice),
-          
+
           // Header with Logo and Company Details
           _buildCompanyHeader(settings, logoImage),
-          
+
           // Invoice Title
           _buildInvoiceTitle(),
-          
+
           // Invoice Number and Date Row
           _buildInvoiceNumberRow(invoice),
-          
+
           // Party Details and Shipping (Side by Side)
           _buildPartyAndShipping(invoice),
-          
+
           // Order Details Row
           _buildOrderDetailsRow(invoice),
-          
+
           // Items Table
           _buildItemsTable(invoice, settings),
-          
+
           // Total in Words and Tax Summary
           _buildTotalsSection(invoice, settings),
-          
+
           // Bank Details Section
           _buildBankDetails(settings),
-          
+
           // Customer Notes
           _buildCustomerNotes(invoice),
-          
+
           // Terms & Conditions
           _buildTermsAndConditions(settings),
-          
+
           // Signature Section
           _buildSignatureSection(settings, signatureImage, stampImage),
         ],
       ),
     );
   }
-  
+
   static pw.Widget _buildTopBar(AppSettings settings, Invoice invoice) {
     return pw.Container(
       padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: const pw.BoxDecoration(
-        border: pw.Border(bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
+        border:
+            pw.Border(bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
       ),
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -110,12 +111,14 @@ class ProfessionalInvoiceTemplate {
       ),
     );
   }
-  
-  static pw.Widget _buildCompanyHeader(AppSettings settings, pw.MemoryImage? logoImage) {
+
+  static pw.Widget _buildCompanyHeader(
+      AppSettings settings, pw.MemoryImage? logoImage) {
     return pw.Container(
       padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: const pw.BoxDecoration(
-        border: pw.Border(bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
+        border:
+            pw.Border(bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
       ),
       child: pw.Row(
         crossAxisAlignment: pw.CrossAxisAlignment.center,
@@ -147,7 +150,7 @@ class ProfessionalInvoiceTemplate {
                 ),
               ),
             ),
-          
+
           // Company Details
           pw.Expanded(
             child: pw.Container(
@@ -198,13 +201,14 @@ class ProfessionalInvoiceTemplate {
       ),
     );
   }
-  
+
   static pw.Widget _buildInvoiceTitle() {
     return pw.Container(
       width: double.infinity,
       padding: const pw.EdgeInsets.symmetric(vertical: 6),
       decoration: const pw.BoxDecoration(
-        border: pw.Border(bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
+        border:
+            pw.Border(bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
       ),
       child: pw.Center(
         child: pw.Text(
@@ -217,12 +221,13 @@ class ProfessionalInvoiceTemplate {
       ),
     );
   }
-  
+
   static pw.Widget _buildInvoiceNumberRow(Invoice invoice) {
     return pw.Container(
       padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: const pw.BoxDecoration(
-        border: pw.Border(bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
+        border:
+            pw.Border(bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
       ),
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -239,7 +244,7 @@ class ProfessionalInvoiceTemplate {
       ),
     );
   }
-  
+
   static pw.Widget _buildPartyAndShipping(Invoice invoice) {
     return pw.Row(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -260,7 +265,8 @@ class ProfessionalInvoiceTemplate {
               children: [
                 pw.Text(
                   'Party Details:',
-                  style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
+                  style:
+                      pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
                 ),
                 pw.SizedBox(height: 2),
                 pw.Text(
@@ -280,7 +286,8 @@ class ProfessionalInvoiceTemplate {
                     ),
                   ),
                 pw.SizedBox(height: 2),
-                if (invoice.clientGstin.isNotEmpty || invoice.clientStateCode.isNotEmpty)
+                if (invoice.clientGstin.isNotEmpty ||
+                    invoice.clientStateCode.isNotEmpty)
                   pw.Text(
                     '${invoice.clientGstin.isNotEmpty ? 'GSTIN: ${invoice.clientGstin}' : ''}${invoice.clientStateCode.isNotEmpty ? '  State Code: ${invoice.clientStateCode}' : ''}',
                     style: const pw.TextStyle(fontSize: 6),
@@ -290,13 +297,14 @@ class ProfessionalInvoiceTemplate {
             ),
           ),
         ),
-        
+
         // Shipping Details
         pw.Expanded(
           child: pw.Container(
             padding: const pw.EdgeInsets.all(6),
             decoration: const pw.BoxDecoration(
-              border: pw.Border(bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
+              border: pw.Border(
+                  bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
             ),
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -304,7 +312,8 @@ class ProfessionalInvoiceTemplate {
               children: [
                 pw.Text(
                   'Shipping : ${invoice.shippingAddress.isNotEmpty ? invoice.shippingAddress : invoice.clientName}',
-                  style: pw.TextStyle(fontSize: 7, fontWeight: pw.FontWeight.bold),
+                  style:
+                      pw.TextStyle(fontSize: 7, fontWeight: pw.FontWeight.bold),
                   maxLines: 1,
                   overflow: pw.TextOverflow.clip,
                 ),
@@ -332,12 +341,13 @@ class ProfessionalInvoiceTemplate {
       ],
     );
   }
-  
+
   static pw.Widget _buildOrderDetailsRow(Invoice invoice) {
     return pw.Container(
       padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: const pw.BoxDecoration(
-        border: pw.Border(bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
+        border:
+            pw.Border(bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
       ),
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -361,18 +371,18 @@ class ProfessionalInvoiceTemplate {
       ),
     );
   }
-  
+
   static pw.Widget _buildItemsTable(Invoice invoice, AppSettings settings) {
     return pw.Table(
       border: pw.TableBorder.all(color: PdfColors.black, width: 1),
       columnWidths: {
-        0: const pw.FixedColumnWidth(30),   // S.No
-        1: const pw.FlexColumnWidth(5),     // Item Description
-        2: const pw.FixedColumnWidth(60),   // HSN/SAC Code
-        3: const pw.FixedColumnWidth(35),   // Qty
-        4: const pw.FixedColumnWidth(35),   // Unit
-        5: const pw.FixedColumnWidth(55),   // Rate
-        6: const pw.FixedColumnWidth(65),   // Amount
+        0: const pw.FixedColumnWidth(30), // S.No
+        1: const pw.FlexColumnWidth(5), // Item Description
+        2: const pw.FixedColumnWidth(60), // HSN/SAC Code
+        3: const pw.FixedColumnWidth(35), // Qty
+        4: const pw.FixedColumnWidth(35), // Unit
+        5: const pw.FixedColumnWidth(55), // Rate
+        6: const pw.FixedColumnWidth(65), // Amount
       },
       children: [
         // Header Row
@@ -380,7 +390,8 @@ class ProfessionalInvoiceTemplate {
           decoration: const pw.BoxDecoration(color: PdfColors.blue100),
           children: [
             _tableCell('S. No.', isHeader: true),
-            _tableCell('Item Description', isHeader: true, align: pw.TextAlign.left),
+            _tableCell('Item Description',
+                isHeader: true, align: pw.TextAlign.left),
             _tableCell('HSN/SAC Code', isHeader: true),
             _tableCell('Qty', isHeader: true),
             _tableCell('Unit', isHeader: true),
@@ -388,7 +399,7 @@ class ProfessionalInvoiceTemplate {
             _tableCell('Amount', isHeader: true),
           ],
         ),
-        
+
         // Item Rows
         ...invoice.items.asMap().entries.map((entry) {
           final index = entry.key + 1;
@@ -404,8 +415,8 @@ class ProfessionalInvoiceTemplate {
               _tableCell((item.quantity * item.unitPrice).toStringAsFixed(2)),
             ],
           );
-        }).toList(),
-        
+        }),
+
         // Empty rows for spacing (minimum 8 rows total to fill page)
         ...List.generate(
           (8 - invoice.items.length).clamp(0, 8),
@@ -424,8 +435,9 @@ class ProfessionalInvoiceTemplate {
       ],
     );
   }
-  
-  static pw.Widget _tableCell(String text, {bool isHeader = false, pw.TextAlign align = pw.TextAlign.center}) {
+
+  static pw.Widget _tableCell(String text,
+      {bool isHeader = false, pw.TextAlign align = pw.TextAlign.center}) {
     return pw.Container(
       padding: const pw.EdgeInsets.symmetric(horizontal: 3, vertical: 4),
       child: pw.Text(
@@ -440,7 +452,7 @@ class ProfessionalInvoiceTemplate {
       ),
     );
   }
-  
+
   static pw.Widget _buildTotalsSection(Invoice invoice, AppSettings settings) {
     final subtotal = invoice.subtotal;
     final packagingCharges = invoice.courierCharges;
@@ -449,7 +461,7 @@ class ProfessionalInvoiceTemplate {
     final cgst = !invoice.isInterstate ? taxableValue * 0.09 : 0.0;
     final sgst = !invoice.isInterstate ? taxableValue * 0.09 : 0.0;
     final grandTotal = taxableValue + igst + cgst + sgst;
-    
+
     return pw.Row(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -469,25 +481,28 @@ class ProfessionalInvoiceTemplate {
               children: [
                 pw.Text(
                   'Total Invoice Value (in words)',
-                  style: pw.TextStyle(fontSize: 7, fontWeight: pw.FontWeight.bold),
+                  style:
+                      pw.TextStyle(fontSize: 7, fontWeight: pw.FontWeight.bold),
                 ),
                 pw.SizedBox(height: 3),
                 pw.Text(
                   _numberToWords(grandTotal),
-                  style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
+                  style:
+                      pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
                 ),
               ],
             ),
           ),
         ),
-        
+
         // Right: Tax Breakdown
         pw.Expanded(
           flex: 1,
           child: pw.Column(
             children: [
               _totalRow('Total :', subtotal, settings),
-              _totalRow('Packaging &\nForwarding Charges :', packagingCharges, settings),
+              _totalRow('Packaging &\nForwarding Charges :', packagingCharges,
+                  settings),
               _totalRow('Taxable Value :', taxableValue, settings),
               if (invoice.isInterstate)
                 _totalRow('IGST', igst, settings, rate: '18%')
@@ -496,7 +511,7 @@ class ProfessionalInvoiceTemplate {
                 _totalRow('SGST', sgst, settings, rate: '9%'),
               ],
               _totalRow('Round Off :', 0.0, settings),
-              
+
               // Grand Total
               pw.Container(
                 padding: const pw.EdgeInsets.all(6),
@@ -512,11 +527,13 @@ class ProfessionalInvoiceTemplate {
                   children: [
                     pw.Text(
                       'GRAND TOTAL :',
-                      style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+                      style: pw.TextStyle(
+                          fontSize: 9, fontWeight: pw.FontWeight.bold),
                     ),
                     pw.Text(
                       grandTotal.toStringAsFixed(2),
-                      style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+                      style: pw.TextStyle(
+                          fontSize: 9, fontWeight: pw.FontWeight.bold),
                     ),
                   ],
                 ),
@@ -527,8 +544,9 @@ class ProfessionalInvoiceTemplate {
       ],
     );
   }
-  
-  static pw.Widget _totalRow(String label, double amount, AppSettings settings, {String? rate}) {
+
+  static pw.Widget _totalRow(String label, double amount, AppSettings settings,
+      {String? rate}) {
     return pw.Container(
       padding: const pw.EdgeInsets.symmetric(vertical: 2.5, horizontal: 5),
       decoration: const pw.BoxDecoration(
@@ -570,12 +588,13 @@ class ProfessionalInvoiceTemplate {
       ),
     );
   }
-  
+
   static pw.Widget _buildBankDetails(AppSettings settings) {
     return pw.Container(
       padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: const pw.BoxDecoration(
-        border: pw.Border(bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
+        border:
+            pw.Border(bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
       ),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -584,7 +603,8 @@ class ProfessionalInvoiceTemplate {
             children: [
               pw.Text(
                 'Bank Details : ',
-                style: pw.TextStyle(fontSize: 7, fontWeight: pw.FontWeight.bold),
+                style:
+                    pw.TextStyle(fontSize: 7, fontWeight: pw.FontWeight.bold),
               ),
               pw.Text(
                 settings.bankName ?? 'PUNJAB NATIONAL BANK',
@@ -595,10 +615,12 @@ class ProfessionalInvoiceTemplate {
           pw.SizedBox(height: 2),
           pw.Row(
             children: [
-              if (settings.bankAccountNumber != null && settings.bankAccountNumber!.isNotEmpty) ...[
+              if (settings.bankAccountNumber != null &&
+                  settings.bankAccountNumber!.isNotEmpty) ...[
                 pw.Text(
                   'A/c No. : ',
-                  style: pw.TextStyle(fontSize: 6.5, fontWeight: pw.FontWeight.bold),
+                  style: pw.TextStyle(
+                      fontSize: 6.5, fontWeight: pw.FontWeight.bold),
                 ),
                 pw.Text(
                   settings.bankAccountNumber!,
@@ -606,10 +628,12 @@ class ProfessionalInvoiceTemplate {
                 ),
                 pw.SizedBox(width: 20),
               ],
-              if (settings.bankIfscCode != null && settings.bankIfscCode!.isNotEmpty) ...[
+              if (settings.bankIfscCode != null &&
+                  settings.bankIfscCode!.isNotEmpty) ...[
                 pw.Text(
                   'IFSC Code No. : ',
-                  style: pw.TextStyle(fontSize: 6.5, fontWeight: pw.FontWeight.bold),
+                  style: pw.TextStyle(
+                      fontSize: 6.5, fontWeight: pw.FontWeight.bold),
                 ),
                 pw.Text(
                   settings.bankIfscCode!,
@@ -618,14 +642,16 @@ class ProfessionalInvoiceTemplate {
               ],
             ],
           ),
-          if (settings.bankRoutingNumber != null && settings.bankRoutingNumber!.isNotEmpty)
+          if (settings.bankRoutingNumber != null &&
+              settings.bankRoutingNumber!.isNotEmpty)
             pw.Padding(
               padding: const pw.EdgeInsets.only(top: 2),
               child: pw.Row(
                 children: [
                   pw.Text(
                     'Branch : ',
-                    style: pw.TextStyle(fontSize: 6.5, fontWeight: pw.FontWeight.bold),
+                    style: pw.TextStyle(
+                        fontSize: 6.5, fontWeight: pw.FontWeight.bold),
                   ),
                   pw.Text(
                     settings.bankRoutingNumber!,
@@ -638,12 +664,13 @@ class ProfessionalInvoiceTemplate {
       ),
     );
   }
-  
+
   static pw.Widget _buildCustomerNotes(Invoice invoice) {
     return pw.Container(
       padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: const pw.BoxDecoration(
-        border: pw.Border(bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
+        border:
+            pw.Border(bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
       ),
       child: pw.Text(
         'Customer Notes:',
@@ -651,12 +678,13 @@ class ProfessionalInvoiceTemplate {
       ),
     );
   }
-  
+
   static pw.Widget _buildTermsAndConditions(AppSettings settings) {
     return pw.Container(
       padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: const pw.BoxDecoration(
-        border: pw.Border(bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
+        border:
+            pw.Border(bottom: pw.BorderSide(color: PdfColors.black, width: 1)),
       ),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -667,11 +695,11 @@ class ProfessionalInvoiceTemplate {
           ),
           pw.SizedBox(height: 2),
           pw.Text(
-            settings.termsAndConditions ?? 
-            '1. Goods once sold will not be taken back.\n'
-            '2. Interest @ 18% p.a will be charged if bill is not paid within 7 days thereafter it will not be entertained.\n'
-            '3. The seller is not responsible for any damage during transit.\n'
-            '4. All disputes subject to delhi jurisdiction only.',
+            settings.termsAndConditions ??
+                '1. Goods once sold will not be taken back.\n'
+                    '2. Interest @ 18% p.a will be charged if bill is not paid within 7 days thereafter it will not be entertained.\n'
+                    '3. The seller is not responsible for any damage during transit.\n'
+                    '4. All disputes subject to delhi jurisdiction only.',
             style: const pw.TextStyle(fontSize: 6),
             maxLines: 5,
           ),
@@ -679,8 +707,9 @@ class ProfessionalInvoiceTemplate {
       ),
     );
   }
-  
-  static pw.Widget _buildSignatureSection(AppSettings settings, pw.MemoryImage? signatureImage, pw.MemoryImage? stampImage) {
+
+  static pw.Widget _buildSignatureSection(AppSettings settings,
+      pw.MemoryImage? signatureImage, pw.MemoryImage? stampImage) {
     return pw.Container(
       padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       child: pw.Row(
@@ -692,7 +721,7 @@ class ProfessionalInvoiceTemplate {
             'E. & O.E.',
             style: pw.TextStyle(fontSize: 7, fontWeight: pw.FontWeight.bold),
           ),
-          
+
           // Stamp (if available)
           if (stampImage != null)
             pw.Container(
@@ -700,7 +729,7 @@ class ProfessionalInvoiceTemplate {
               height: 60,
               child: pw.Image(stampImage, fit: pw.BoxFit.contain),
             ),
-          
+
           // Signature Section
           pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.end,
@@ -717,12 +746,14 @@ class ProfessionalInvoiceTemplate {
               pw.SizedBox(height: 3),
               pw.Text(
                 'Authorised Signatory',
-                style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
+                style:
+                    pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
               ),
               pw.SizedBox(height: 1),
               pw.Text(
                 'For ${settings.companyName.toUpperCase()}',
-                style: pw.TextStyle(fontSize: 6.5, fontWeight: pw.FontWeight.bold),
+                style:
+                    pw.TextStyle(fontSize: 6.5, fontWeight: pw.FontWeight.bold),
               ),
             ],
           ),
@@ -730,17 +761,50 @@ class ProfessionalInvoiceTemplate {
       ),
     );
   }
-  
+
   static String _numberToWords(double number) {
     var intPart = number.floor();
     if (intPart == 0) return 'Zero Only';
-    
-    final ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
-    final tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-    final teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
-    
+
+    final ones = [
+      '',
+      'One',
+      'Two',
+      'Three',
+      'Four',
+      'Five',
+      'Six',
+      'Seven',
+      'Eight',
+      'Nine'
+    ];
+    final tens = [
+      '',
+      '',
+      'Twenty',
+      'Thirty',
+      'Forty',
+      'Fifty',
+      'Sixty',
+      'Seventy',
+      'Eighty',
+      'Ninety'
+    ];
+    final teens = [
+      'Ten',
+      'Eleven',
+      'Twelve',
+      'Thirteen',
+      'Fourteen',
+      'Fifteen',
+      'Sixteen',
+      'Seventeen',
+      'Eighteen',
+      'Nineteen'
+    ];
+
     String result = '';
-    
+
     // Lakhs
     if (intPart >= 100000) {
       final lakhs = intPart ~/ 100000;
@@ -753,7 +817,7 @@ class ProfessionalInvoiceTemplate {
       result += 'Lakh ';
       intPart %= 100000;
     }
-    
+
     // Thousands
     if (intPart >= 1000) {
       final thousands = intPart ~/ 1000;
@@ -768,13 +832,13 @@ class ProfessionalInvoiceTemplate {
       result += 'Thousand ';
       intPart %= 1000;
     }
-    
+
     // Hundreds
     if (intPart >= 100) {
       result += '${ones[intPart ~/ 100]} Hundred ';
       intPart %= 100;
     }
-    
+
     // Tens and Ones
     if (intPart >= 20) {
       result += '${tens[intPart ~/ 10]} ';
@@ -783,11 +847,11 @@ class ProfessionalInvoiceTemplate {
       result += '${teens[intPart - 10]} ';
       intPart = 0;
     }
-    
+
     if (intPart > 0) {
       result += '${ones[intPart]} ';
     }
-    
+
     return '${result.trim()} Only';
   }
 }

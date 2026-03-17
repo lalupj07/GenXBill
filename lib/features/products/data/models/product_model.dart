@@ -75,6 +75,40 @@ class Product {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'unitPrice': unitPrice,
+      'taxRate': taxRate,
+      'isActive': isActive,
+      'sku': sku,
+      'stockQuantity': stockQuantity,
+      'minStockLevel': minStockLevel,
+      'hsnCode': hsnCode,
+      'isBatchTracked': isBatchTracked,
+      'isSerialized': isSerialized,
+    };
+  }
+
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      description: json['description'] as String,
+      unitPrice: (json['unitPrice'] as num).toDouble(),
+      taxRate: (json['taxRate'] as num?)?.toDouble() ?? 0.0,
+      isActive: json['isActive'] as bool? ?? true,
+      sku: json['sku'] as String? ?? '',
+      stockQuantity: (json['stockQuantity'] as num?)?.toDouble() ?? 0.0,
+      minStockLevel: (json['minStockLevel'] as num?)?.toDouble() ?? 0.0,
+      hsnCode: json['hsnCode'] as String? ?? '',
+      isBatchTracked: json['isBatchTracked'] as bool? ?? false,
+      isSerialized: json['isSerialized'] as bool? ?? false,
+    );
+  }
+
   Product copyWith({
     String? id,
     String? name,

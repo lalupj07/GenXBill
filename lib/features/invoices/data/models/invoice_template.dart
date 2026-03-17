@@ -16,4 +16,24 @@ enum InvoiceTemplate {
   gst,
   @HiveField(5)
   creative,
+  @HiveField(6)
+  professional,
+  @HiveField(7)
+  executive,
+  @HiveField(8)
+  corporate,
+  @HiveField(9)
+  elegant,
+  @HiveField(10)
+  standard,
+  @HiveField(11)
+  enterprise,
+  @HiveField(12)
+  compact,
+  @HiveField(13)
+  detailed,
+  @HiveField(14)
+  retail,
+  @HiveField(15)
+  service,
 }

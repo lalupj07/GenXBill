@@ -65,6 +65,7 @@ class InventoryRepository {
     return box.values.where((item) {
       return item.productName.toLowerCase().contains(lowerQuery) ||
           item.sku.toLowerCase().contains(lowerQuery) ||
+          item.productId.toLowerCase().contains(lowerQuery) ||
           (item.batchNumber?.toLowerCase().contains(lowerQuery) ?? false) ||
           (item.serialNumber?.toLowerCase().contains(lowerQuery) ?? false);
     }).toList();

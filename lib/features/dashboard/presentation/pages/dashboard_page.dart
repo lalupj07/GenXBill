@@ -13,6 +13,8 @@ import 'package:genx_bill/l10n/app_localizations.dart';
 import 'package:genx_bill/core/utils/currency_utils.dart';
 import 'package:genx_bill/core/providers/settings_provider.dart';
 import 'package:genx_bill/core/models/app_settings.dart';
+import 'dart:io';
+import 'package:genx_bill/features/dashboard/presentation/widgets/smart_insights_widget.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -33,7 +35,7 @@ class DashboardPage extends ConsumerWidget {
                 top: true,
                 child: Column(
                   children: [
-                    _buildAppBar(context),
+                    _buildAppBar(context, settings),
                     Expanded(
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.all(16),
@@ -41,7 +43,7 @@ class DashboardPage extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              l10n.welcomeBack,
+                              'Welcome back, ${settings.companyName}',
                               style: const TextStyle(
                                   fontSize: 24, fontWeight: FontWeight.bold),
                             ).animate().fadeIn().slideX(begin: -0.2),
@@ -53,6 +55,11 @@ class DashboardPage extends ConsumerWidget {
                                 .animate()
                                 .fadeIn()
                                 .slideX(begin: -0.2, delay: 100.ms),
+                            const SizedBox(height: 24),
+
+                            // Smart Insights Section
+                            const SmartInsightsWidget(),
+
                             const SizedBox(height: 24),
 
                             // Stats Grid with REAL DATA
@@ -554,20 +561,26 @@ class DashboardPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
+  Widget _buildAppBar(BuildContext context, AppSettings settings) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
         children: [
-          const CircleAvatar(
+          CircleAvatar(
             backgroundColor: AppTheme.primaryColor,
             radius: 20,
-            child: Icon(Icons.flash_on, color: Colors.white),
+            backgroundImage:
+                settings.companyLogo != null && settings.companyLogo!.isNotEmpty
+                    ? FileImage(File(settings.companyLogo!))
+                    : null,
+            child: settings.companyLogo == null || settings.companyLogo!.isEmpty
+                ? const Icon(Icons.flash_on, color: Colors.white)
+                : null,
           ),
           const SizedBox(width: 12),
-          const Text(
-            'GenXBill',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          Text(
+            settings.companyName,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const Spacer(),
           IconButton(

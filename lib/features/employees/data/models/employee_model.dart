@@ -67,6 +67,34 @@ class Employee {
       notes: notes ?? this.notes,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'role': role,
+      'email': email,
+      'phone': phone,
+      'joinDate': joinDate.toIso8601String(),
+      'salary': salary,
+      'isActive': isActive,
+      'notes': notes,
+    };
+  }
+
+  factory Employee.fromJson(Map<String, dynamic> json) {
+    return Employee(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      role: json['role'] as String,
+      email: json['email'] as String,
+      phone: json['phone'] as String,
+      joinDate: DateTime.parse(json['joinDate'] as String),
+      salary: (json['salary'] as num).toDouble(),
+      isActive: json['isActive'] as bool? ?? true,
+      notes: json['notes'] as String? ?? '',
+    );
+  }
 }
 
 class EmployeeAdapter extends TypeAdapter<Employee> {

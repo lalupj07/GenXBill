@@ -1,5 +1,50 @@
 # GenXBill Changelog
 
+## [5.2.0] - 2026-03-11
+
+### 🎉 Major Features
+
+#### Smart Analytics Dashboard
+- Real-time business insights with comprehensive data visualization
+- Revenue trends with 30-day line charts
+- Top products analysis with sales metrics
+- Customer payment behavior with credit scoring (0-100)
+- Cash flow forecasting for 30/60/90 days
+- Key metrics dashboard with glass morphism UI
+
+#### Invoice Themes System
+- 5 predefined professional themes (Modern, Classic, Minimal, Corporate, Colorful)
+- Theme selector UI in Settings
+- Visual theme preview with instant switching
+- Persistent theme storage
+
+#### Automated Payment Reminders
+- Smart reminder scheduling (7 days before to 14 days after due date)
+- Multi-channel support (Email and WhatsApp)
+- Professional reminder templates
+- Reminder control panel in Settings
+- Statistics dashboard for active and overdue reminders
+
+### 🔧 Technical Improvements
+- Generated Hive type adapters for all new models (typeIds 10-15)
+- Repository pattern implementation (InvoiceThemeRepository, ReminderRepository)
+- Riverpod state management providers
+- Service layer for analytics and reminders
+- Zero deprecation warnings - updated to latest Flutter APIs
+- Const optimization and code quality improvements
+
+### 📦 Database Changes
+- New Hive boxes: invoice_themes, payment_reminders
+- Automatic initialization of predefined themes
+- Data persistence for all settings
+
+### 🐛 Bug Fixes
+- Fixed model field name mismatches
+- Corrected type conversion errors
+- Resolved switch statement exhaustiveness issues
+
+---
+
 ## [5.1.0] - 2026-02-22
 
 ### 🎉 Major Features

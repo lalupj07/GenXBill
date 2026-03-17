@@ -6,8 +6,9 @@ import 'package:genx_bill/features/clients/data/repositories/client_repository.d
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
+import 'package:genx_bill/features/clients/presentation/pages/client_ledger_page.dart';
 
-import 'package:genx_bill/core/widgets/main_layout.dart';
+import 'package:genx_bill/core/providers/navigation_provider.dart';
 
 class ClientsPage extends ConsumerStatefulWidget {
   const ClientsPage({super.key});
@@ -40,10 +41,14 @@ class _ClientsPageState extends ConsumerState<ClientsPage> {
                     Row(
                       children: [
                         IconButton(
-                          icon:
-                              const Icon(Icons.arrow_back, color: Colors.white),
+                          icon: Icon(Icons.arrow_back,
+                              color: Theme.of(context).colorScheme.onSurface),
                           onPressed: () {
-                            ref.read(navigationProvider.notifier).state = 0;
+                            if (Navigator.canPop(context)) {
+                              Navigator.pop(context);
+                            } else {
+                              ref.read(navigationProvider.notifier).state = 0;
+                            }
                           },
                           tooltip: 'Back to Home',
                         ),
@@ -250,6 +255,16 @@ class _ClientsPageState extends ConsumerState<ClientsPage> {
             icon: const Icon(Icons.more_vert),
             itemBuilder: (context) => [
               const PopupMenuItem(
+                value: 'ledger',
+                child: Row(
+                  children: [
+                    Icon(Icons.receipt_long, size: 20),
+                    SizedBox(width: 8),
+                    Text('Ledger'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
                 value: 'edit',
                 child: Row(
                   children: [
@@ -271,7 +286,15 @@ class _ClientsPageState extends ConsumerState<ClientsPage> {
               ),
             ],
             onSelected: (value) {
-              if (value == 'edit') {
+              if (value == 'ledger') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        ClientLedgerPage(initialClient: client),
+                  ),
+                );
+              } else if (value == 'edit') {
                 _showEditClientDialog(context, client);
               } else if (value == 'delete') {
                 _deleteClient(client);
@@ -290,6 +313,7 @@ class _ClientsPageState extends ConsumerState<ClientsPage> {
     final addressController = TextEditingController();
     final taxIdController = TextEditingController();
     final notesController = TextEditingController();
+    final creditLimitController = TextEditingController();
     ClientType selectedType = ClientType.customer;
 
     showDialog(
@@ -319,6 +343,13 @@ class _ClientsPageState extends ConsumerState<ClientsPage> {
                         setDialogState(() => selectedType = value);
                       }
                     },
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: creditLimitController,
+                    decoration: const InputDecoration(
+                        labelText: 'Credit Limit (Optional)'),
+                    keyboardType: TextInputType.number,
                   ),
                   const SizedBox(height: 16),
                   TextField(
@@ -384,6 +415,8 @@ class _ClientsPageState extends ConsumerState<ClientsPage> {
                         ? null
                         : notesController.text,
                     type: selectedType,
+                    creditLimit:
+                        double.tryParse(creditLimitController.text) ?? 0.0,
                   );
                   ref.read(clientRepositoryProvider).addClient(client);
                   Navigator.pop(context);
@@ -408,6 +441,8 @@ class _ClientsPageState extends ConsumerState<ClientsPage> {
     final addressController = TextEditingController(text: client.address);
     final taxIdController = TextEditingController(text: client.taxId ?? '');
     final notesController = TextEditingController(text: client.notes ?? '');
+    final creditLimitController =
+        TextEditingController(text: client.creditLimit.toString());
     ClientType selectedType = client.type;
 
     showDialog(
@@ -437,6 +472,13 @@ class _ClientsPageState extends ConsumerState<ClientsPage> {
                         setDialogState(() => selectedType = value);
                       }
                     },
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: creditLimitController,
+                    decoration: const InputDecoration(
+                        labelText: 'Credit Limit (Optional)'),
+                    keyboardType: TextInputType.number,
                   ),
                   const SizedBox(height: 16),
                   TextField(
@@ -500,6 +542,8 @@ class _ClientsPageState extends ConsumerState<ClientsPage> {
                         ? null
                         : notesController.text,
                     type: selectedType,
+                    creditLimit:
+                        double.tryParse(creditLimitController.text) ?? 0.0,
                   );
                   ref
                       .read(clientRepositoryProvider)

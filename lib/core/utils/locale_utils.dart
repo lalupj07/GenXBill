@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class LocaleUtils {
-  static Locale getLocaleFromLanguage(String language) {
+  static Locale getLocaleFromLanguage(String? language) {
     switch (language) {
       case 'Hindi':
         return const Locale('hi');
@@ -22,6 +22,7 @@ class LocaleUtils {
       case 'Portuguese':
         return const Locale('pt');
       case 'English':
+      case null:
       default:
         return const Locale('en');
     }
